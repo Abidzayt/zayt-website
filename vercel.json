@@ -1,0 +1,6 @@
+{
+  "rewrites": [
+    { "source": "/", "destination": "/ZAYT.html" }
+  ],
+  "cleanUrls": true
+}
