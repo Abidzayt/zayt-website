@@ -1,0 +1,2215 @@
+<!DOCTYPE html><html data-src-ver="1890036d" lang="es"><head>
+
+
+
+
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ZAYT — Elixir Botanique</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400;1,600&family=Jost:wght@200;300;400;500&family=Raleway:wght@200;300;400&family=Nunito+Sans:wght@200;300;400&display=swap" rel="stylesheet">
+<script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+<script type="text/babel" src="tweaks-panel.jsx"></script>
+<style>
+:root{
+  --cream:#F7F3ED;
+  --cream-dark:#EDE8DF;
+  --gold:#C9A752;
+  --gold-light:#E8D5A0;
+  --gold-dark:#9C7D2E;
+  --black:#080808;
+  --black-soft:#1A1A1A;
+  --white:#FFFFFF;
+  --text-muted:#555555;
+  --text-cream:rgba(237,232,223,0.85);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth;-webkit-text-size-adjust:100%}
+body{
+  font-family:'Jost',sans-serif;
+  font-weight:300;
+  color:var(--cream);
+  -webkit-font-smoothing:antialiased;
+  -moz-osx-font-smoothing:grayscale;
+  overflow-x:hidden;
+  background:var(--black);
+}
+img,video{max-width:100%;display:block}
+button{font-family:inherit;cursor:pointer;border:none;background:none;color:inherit}
+a{color:inherit;text-decoration:none}
+
+/* ─── Continuous background canvas ─── */
+/* Body owns the master color; sections layer their own surfaces over the bottle */
+.bg-canvas{
+  position:fixed;inset:0;z-index:0;
+  background:var(--cream);
+  pointer-events:none;
+}
+/* This dark layer fades up to cover the cream at section 2,
+   then peels back via clip-path for the spotlight reveal,
+   then closes again, etc. The layer is a single positioned div whose
+   opacity + clip-path are scroll-driven. */
+.bg-dark-layer{
+  position:fixed;inset:0;z-index:1;
+  background:var(--black);
+  pointer-events:none;
+  opacity:0;
+  /* default: fully visible. Animations below override per scroll-timeline */
+}
+
+/* ─── Type utilities ─── */
+.label{font-family:'Jost',sans-serif;font-weight:400;font-size:10px;letter-spacing:5px;text-transform:uppercase;color:var(--gold)}
+.serif{font-family:'Cormorant Garamond',serif;font-weight:300}
+
+/* ─── Buttons ─── */
+.btn{
+  display:inline-flex;align-items:center;justify-content:center;
+  font-family:'Jost',sans-serif;font-weight:400;font-size:11px;
+  letter-spacing:4px;text-transform:uppercase;
+  padding:18px 40px;border-radius:2px;border:none;
+  transition:all .35s ease;cursor:pointer;
+  width:100%;min-height:48px;
+}
+.btn-primary{background:var(--gold);color:var(--black)}
+.btn-primary:hover{background:var(--gold-dark);color:var(--cream)}
+.btn-outline{background:transparent;border:.5px solid var(--black);color:var(--black)}
+.btn-outline:hover{background:var(--black);color:var(--cream)}
+.btn-ghost{background:transparent;border:.5px solid var(--gold);color:var(--gold)}
+.btn-ghost:hover{background:var(--gold);color:var(--black)}
+@media(min-width:768px){.btn{width:auto}}
+
+/* ─── Navigation ─── */
+.nav{
+  position:fixed;top:0;left:0;right:0;z-index:1000;
+  height:64px;display:flex;align-items:center;justify-content:space-between;
+  padding:0 24px;
+  background:transparent;
+  transition:background .4s ease, border-color .4s ease, color .4s ease;
+  border-bottom:.5px solid transparent;
+  color:var(--cream);
+}
+.nav.on-cream{color:var(--black)}
+.nav.on-cream .nav-brand{color:var(--gold-dark)}
+.nav.on-cream .hamburger span{background:var(--black)}
+.nav.on-cream.scrolled{background:rgba(247,243,237,0.92);border-bottom:.5px solid var(--gold-light);backdrop-filter:blur(12px)}
+.nav.on-dark.scrolled{background:var(--black);border-bottom:.5px solid rgba(201,167,82,0.3);backdrop-filter:blur(8px)}
+.nav.on-dark.scrolled .nav-brand{color:var(--gold)}
+.nav.on-dark.scrolled .hamburger span{background:var(--cream)}
+.nav-brand{
+  font-family:'Cormorant Garamond',serif;font-weight:300;
+  font-size:20px;letter-spacing:8px;color:var(--white);
+  transition:color .4s ease;
+}
+.nav-center{display:none}
+.nav-right{display:flex;align-items:center;gap:16px}
+.lang-switcher{display:none;align-items:center;gap:6px}
+.lang-btn{
+  font-family:'Jost',sans-serif;font-size:9px;font-weight:400;
+  letter-spacing:2px;color:inherit;padding:4px 4px;
+  background:none;border:none;border-bottom:.5px solid transparent;
+  transition:all .3s ease;cursor:pointer;opacity:.55;
+}
+.lang-btn.active{opacity:1;color:var(--gold);border-bottom:.5px solid var(--gold)}
+.lang-sep{color:var(--gold);opacity:.4;font-size:9px}
+.nav .btn-ghost{display:none}
+.hamburger{
+  width:28px;height:28px;display:flex;flex-direction:column;justify-content:center;gap:5px;
+  background:none;border:none;padding:0;cursor:pointer;
+}
+.hamburger span{display:block;width:22px;height:.5px;background:var(--cream);transition:all .3s ease}
+
+@media(min-width:1200px){
+  .nav{height:72px;padding:0 48px}
+  .nav-brand{font-size:26px;letter-spacing:10px}
+  .nav-center{display:flex;gap:36px;align-items:center}
+  .nav-link{
+    font-family:'Jost',sans-serif;font-weight:300;font-size:10px;
+    letter-spacing:3px;text-transform:uppercase;
+    color:rgba(237,232,223,0.9);
+    transition:color .3s ease;opacity:1;
+  }
+  .nav-link:hover{color:var(--gold)}
+  .nav.on-dark.scrolled .nav-brand{color:#C9A752}
+  .nav.on-dark.scrolled .nav-link{color:rgba(237,232,223,0.8)}
+  .lang-switcher{display:flex}
+  .nav .btn-ghost{display:inline-flex;padding:12px 22px;font-size:10px;letter-spacing:3px;width:auto;min-height:0}
+  .hamburger{display:none}
+}
+
+/* ─── Mobile drawer ─── */
+.drawer{
+  position:fixed;inset:0;z-index:2000;background:var(--black);
+  transform:translateX(100%);transition:transform .4s ease;
+  display:flex;flex-direction:column;align-items:center;padding:32px 24px;
+}
+.drawer.open{transform:translateX(0)}
+.drawer-close{position:absolute;top:24px;right:24px;font-family:'Jost',sans-serif;font-weight:300;font-size:24px;color:var(--gold);background:none;border:none;cursor:pointer;line-height:1}
+.drawer-brand{font-family:'Cormorant Garamond',serif;font-weight:300;font-size:32px;letter-spacing:10px;color:var(--gold);margin-top:16px}
+.drawer-orn{width:60px;height:.5px;background:var(--gold);margin:24px 0 40px;opacity:.6}
+.drawer-links{display:flex;flex-direction:column;align-items:center;gap:8px;flex:1;justify-content:center}
+.drawer-link{font-family:'Cormorant Garamond',serif;font-weight:300;font-size:32px;letter-spacing:2px;color:var(--cream);line-height:60px}
+.drawer-bottom{display:flex;align-items:center;gap:14px;padding-bottom:24px}
+.drawer-bottom .lang-btn{color:var(--cream)}
+
+/* ───────────────────────────────────────────── */
+/*  STICKY BOTTLE — anchored across hero+making   */
+/* ───────────────────────────────────────────── */
+.bottle-stage{
+  position:fixed;
+  z-index:5;
+  pointer-events:none;
+  /* Mobile default: full screen behind hero */
+  top:0;left:0;right:0;bottom:0;
+}
+.bottle-stage .bottle{
+  position:absolute;
+  top:50%;left:50%;
+  transform:translate(-50%,-50%) scale(1);
+  width:100vw;height:100vh;
+  transition:none;
+  display:flex;align-items:center;justify-content:center;
+  overflow:hidden;
+}
+.bottle-stage video,
+.bottle-stage .bottle-fallback{
+  width:100%;height:100%;object-fit:cover;object-position:center;
+  opacity:.9;
+}
+.bottle-fallback{
+  background:linear-gradient(135deg,#080808 0%,#1A1411 50%,#0D0A07 100%);
+  display:flex;align-items:center;justify-content:center;
+  font-family:'Cormorant Garamond',serif;font-style:italic;font-size:48px;color:rgba(201,167,82,0.25);
+}
+
+/* ─── Sections ─── */
+section{position:relative;z-index:2}
+.section{padding:120px 24px;position:relative}
+@media(min-width:1024px){.section{padding:160px 80px}}
+.section-head{text-align:center;max-width:780px;margin:0 auto 64px}
+.section-head .label{margin-bottom:18px;display:inline-block}
+.section-h2{font-family:'Cormorant Garamond',serif;font-weight:300;font-size:36px;line-height:1.05;letter-spacing:-.5px}
+@media(min-width:768px){.section-h2{font-size:52px}}
+@media(min-width:1200px){.section-h2{font-size:68px}}
+.section-sub{font-family:'Cormorant Garamond',serif;font-weight:300;font-style:italic;font-size:18px;color:var(--gold);margin-top:14px}
+@media(min-width:1024px){.section-sub{font-size:22px}}
+
+/* ─────────── HERO ─────────── */
+.hero{
+  position:relative;
+  min-height:100svh;
+  height:100svh;
+  width:100vw;
+  overflow:hidden;
+  z-index:2;
+  color:var(--cream);
+}
+.hero-overlay{
+  position:absolute;inset:0;z-index:1;
+  background:linear-gradient(0deg, rgba(8,8,8,1) 0%, rgba(8,8,8,0.3) 40%, rgba(8,8,8,0.5) 100%);
+}
+.hero-top-vignette{
+  position:absolute;top:0;left:0;right:0;height:40%;z-index:2;
+  background:linear-gradient(180deg, rgba(8,8,8,0.45) 0%, transparent 100%);
+  pointer-events:none;
+}
+@media(min-width:1024px){
+  .hero-overlay{background:linear-gradient(90deg,rgba(8,8,8,0.85) 0%,rgba(8,8,8,0.6) 45%,rgba(8,8,8,0.1) 70%,transparent 100%)}
+}
+.hero-content{
+  position:absolute;left:24px;right:24px;bottom:12%;
+  z-index:2;color:var(--cream);
+}
+@media(min-width:1024px){
+  .hero-content{left:6%;right:auto;top:50%;bottom:auto;transform:translateY(-50%);max-width:54%}
+}
+.hero-eyebrow{font-family:'Jost',sans-serif;font-weight:400;font-size:9px;letter-spacing:6px;text-transform:uppercase;color:var(--gold);opacity:0;animation:fadeIn .4s ease .2s forwards}
+.hero-h1{font-family:'Cormorant Garamond',serif;font-weight:300;font-size:clamp(52px,14vw,130px);line-height:.95;letter-spacing:-1px;margin-top:24px;color:var(--cream)}
+.hero-h1 .ln{display:block;opacity:0;transform:translateY(40px);will-change:transform,opacity}
+.hero-h1 .ln-1{animation:slideUp .8s ease-out .4s forwards}
+.hero-h1 .ln-2{font-style:italic;color:var(--gold);font-weight:300;animation:slideUp .8s ease-out .7s forwards}
+.hero-h1 .ln-3{animation:slideUp .8s ease-out 1s forwards}
+.hero-sub{font-family:'Jost',sans-serif;font-weight:200;font-size:13px;letter-spacing:1px;color:rgba(237,232,223,0.75);margin-top:24px;max-width:480px;opacity:0;animation:fadeIn .5s ease 1.3s forwards}
+.hero-mw{font-family:'Jost',sans-serif;font-weight:300;font-size:10px;letter-spacing:4px;text-transform:uppercase;color:var(--gold);margin-top:8px;opacity:0;animation:fadeIn .4s ease 1.5s forwards}
+.hero-cta{display:flex;flex-direction:column;align-items:flex-start;gap:14px;margin-top:36px;opacity:0;animation:fadeIn .5s ease 1.7s forwards}
+.hero-cta .btn{width:100%}
+.hero-cta .btn-primary{
+  background:#C9A752;color:#080808;border:none;border-radius:0;
+  font-family:'Jost',sans-serif;font-weight:400;font-size:11px;
+  letter-spacing:4px;padding:18px 40px;transition:all 0.3s ease;
+}
+.hero-cta .btn-primary:hover{background:#9C7D2E;color:#080808}
+.hero-cta-link{font-family:'Jost',sans-serif;font-weight:300;font-size:11px;letter-spacing:3px;text-transform:uppercase;color:var(--cream);border-bottom:.5px solid var(--cream);padding:6px 2px;transition:color .3s ease,border-color .3s ease}
+.hero-cta-link:hover{color:var(--gold);border-color:var(--gold)}
+@media(max-width:767px){
+  .hero-h1{font-size:44px;line-height:1.1}
+  .hero-content{left:24px;right:24px}
+  .hero-cta .btn{width:calc(100% - 0px);height:52px;display:flex;align-items:center;justify-content:center;font-size:11px;letter-spacing:4px}
+}
+@media(min-width:768px){.hero-sub{font-size:15px}.hero-cta{flex-direction:row;align-items:center;gap:24px}.hero-cta .btn{width:auto}}
+
+/* fade hero text out as we scroll past it */
+@supports (animation-timeline: view()){
+  .hero-content{
+    animation: heroFade linear both;
+    animation-timeline: view();
+    animation-range: exit 0% exit 60%;
+  }
+}
+@keyframes heroFade{
+  from{opacity:1;transform:translateY(-50%) translateY(0)}
+  to{opacity:0;transform:translateY(-50%) translateY(-40px)}
+}
+
+.hero-scroll{position:absolute;bottom:24px;left:50%;transform:translateX(-50%);z-index:2;display:flex;flex-direction:column;align-items:center;gap:10px;color:rgba(237,232,223,0.5)}
+.hero-scroll-line{width:.5px;height:40px;background:var(--gold);position:relative;overflow:hidden}
+.hero-scroll-line::after{content:"";position:absolute;left:0;top:-40px;width:.5px;height:40px;background:var(--cream);animation:scrollDot 2s ease-in-out infinite}
+.hero-scroll-text{font-family:'Jost',sans-serif;font-weight:200;font-size:9px;letter-spacing:3px;text-transform:uppercase}
+@keyframes scrollDot{0%{top:-40px}50%{top:40px}100%{top:40px}}
+@keyframes slideUp{to{opacity:1;transform:translateY(0)}}
+@keyframes fadeIn{to{opacity:1}}
+
+/* ─────────── SECTION 2 — RESPALDADO POR LA CIENCIA ─────────── */
+.making{
+  position:relative;
+  min-height:100svh;
+  height:100svh;
+  width:100%;
+  overflow:hidden;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  z-index:6;
+  background:var(--black);
+  padding:80px 24px;
+  box-sizing:border-box;
+  text-align:center;
+  color:var(--cream);
+}
+
+/* Background video */
+.making-bg-video{
+  position:absolute;inset:0;
+  z-index:0;overflow:hidden;
+}
+.making-bg-video video{
+  width:100%;height:100%;object-fit:cover;display:block;
+}
+
+/* Dark overlay */
+.making-overlay{
+  position:absolute;inset:0;
+  background:rgba(8,8,8,0.65);
+  z-index:1;
+}
+
+/* Foreground wrapper */
+.making-inner{
+  position:relative;
+  z-index:2;
+  width:100%;max-width:1200px;
+  display:flex;flex-direction:column;align-items:center;
+  gap:48px;
+}
+@media(min-width:1024px){.making-inner{gap:56px}}
+
+/* Section label */
+.making-sci-label{
+  font-family:'Jost',sans-serif;font-weight:400;
+  font-size:9px;letter-spacing:6px;text-transform:uppercase;
+  color:var(--gold);
+}
+
+/* Certification cards grid */
+.sci-cards{
+  display:grid;grid-template-columns:1fr 1fr;gap:14px;width:100%;
+}
+@media(min-width:1024px){.sci-cards{grid-template-columns:repeat(4,1fr);gap:20px}}
+.sci-card{
+  background:rgba(255,255,255,0.05);
+  border:.5px solid rgba(201,167,82,0.4);
+  border-radius:2px;padding:24px 20px;text-align:center;
+  opacity:0;transform:translateY(24px);
+  transition:opacity 0.6s ease-out,transform 0.6s ease-out;
+}
+.sci-card.sci-visible{opacity:1;transform:translateY(0)}
+.sci-card-orn{font-size:13px;color:var(--gold);margin-bottom:12px;display:block}
+.sci-card-title{
+  font-family:'Jost',sans-serif;font-weight:400;
+  font-size:10px;letter-spacing:3px;text-transform:uppercase;
+  color:var(--cream);line-height:1.5;
+}
+
+/* Stats row */
+.sci-stats{
+  display:grid;grid-template-columns:1fr;gap:32px;width:100%;
+}
+@media(min-width:768px){.sci-stats{grid-template-columns:repeat(3,1fr);gap:0}}
+.sci-stat{display:flex;flex-direction:column;align-items:center}
+@media(min-width:768px){
+  .sci-stat:not(:last-child){
+    border-right:.5px solid rgba(201,167,82,0.2);
+  }
+}
+.sci-stat-number{
+  font-family:'Cormorant Garamond',serif;font-weight:300;
+  font-size:clamp(48px,8vw,72px);color:var(--gold);
+  line-height:1;display:block;
+}
+.sci-stat-label{
+  font-family:'Jost',sans-serif;font-weight:200;
+  font-size:11px;letter-spacing:1px;
+  color:rgba(237,232,223,0.6);margin-top:10px;display:block;
+}
+
+/* Expert quote */
+.sci-quote{max-width:620px;}
+.sci-quote-text{
+  font-family:'Cormorant Garamond',serif;font-weight:300;font-style:italic;
+  font-size:clamp(17px,2.5vw,22px);color:var(--gold);line-height:1.6;
+}
+.sci-quote-attr{
+  font-family:'Jost',sans-serif;font-weight:200;
+  font-size:10px;letter-spacing:2px;
+  color:rgba(237,232,223,0.5);margin-top:16px;display:block;
+}
+
+/* ─────────── SPOTLIGHT REVEAL (transition 2 → 3) ─────────── */
+/* The benefits section sits in cream. We achieve the spotlight feel by:
+   the dark cover above (sticky, fixed) animates a clip-path circle that
+   grows from center. We do this with a dedicated overlay tied to scroll. */
+.spotlight{
+  position:relative;
+  background:transparent;
+  padding-top:60px;
+  z-index:2;
+}
+
+/* ─────────── SECTION 3 — BENEFITS ─────────── */
+.benefits{
+  position:relative;
+  background:var(--cream);
+  color:var(--black);
+  padding:80px 24px;
+}
+@media(min-width:1024px){.benefits{padding:100px 80px}}
+.benefits .section-h2{color:var(--black)}
+.benefits .section-sub{color:var(--text-muted)}
+.benefits-grid{display:grid;grid-template-columns:1fr;gap:16px;max-width:1280px;margin:0 auto}
+@media(min-width:768px){.benefits-grid{grid-template-columns:1fr 1fr}}
+@media(min-width:1200px){.benefits-grid{grid-template-columns:1fr 1fr 1fr}}
+.b-card{
+  background:var(--white);border:.5px solid var(--gold-light);border-radius:2px;
+  padding:28px;
+}
+@media(min-width:1024px){.b-card{padding:36px}}
+.b-orn{color:var(--gold);font-size:14px;margin-bottom:16px;font-family:'Cormorant Garamond',serif}
+.b-title{font-family:'Cormorant Garamond',serif;font-weight:300;font-size:22px;color:var(--black);line-height:1.2}
+@media(min-width:1024px){.b-title{font-size:26px}}
+.b-body{font-family:'Jost',sans-serif;font-weight:300;font-size:13px;color:var(--text-muted);line-height:1.85;margin-top:10px}
+/* b-card reveal handled by IntersectionObserver JS — no scroll-driven animation */
+@keyframes rise{from{opacity:0;transform:translateY(40px)}to{opacity:1;transform:none}}
+
+/* slide-out as benefits exits */
+@supports (animation-timeline: view()){
+  .benefits-grid{
+    animation:slideOutLeft linear both;
+    animation-timeline:view();
+    animation-range:exit 20% exit 100%;
+  }
+}
+@keyframes slideOutLeft{
+  to{opacity:0;transform:translateX(-80px)}
+}
+
+/* ─── Gold ornament line transition (3 → 4) ─── */
+.gold-rule{
+  position:relative;z-index:2;
+  height:1px;background:transparent;
+  display:flex;justify-content:center;align-items:center;
+  margin:80px 0;
+}
+.gold-rule::before{
+  content:"";display:block;height:.5px;background:var(--gold);
+  width:0;transition:width 1.2s ease;
+}
+.gold-rule.in::before{width:90%}
+
+/* ─────────── SECTION 4 — INGREDIENTS ─────────── */
+.ingredients{
+  background:var(--black);
+  color:var(--text-cream);
+  padding:80px 24px;
+}
+@media(min-width:1024px){.ingredients{padding:100px 80px}}
+.ingredients .section-h2{color:var(--cream)}
+
+.ing-block{
+  display:grid;grid-template-columns:1fr;
+  padding:48px 0;
+  gap:32px;
+}
+@media(min-width:1024px){
+  .ing-block{grid-template-columns:1fr 1fr;min-height:480px;align-items:center;gap:48px;padding:40px 0}
+  .ing-block.flip .ing-img{order:2}
+  .ing-block.flip .ing-text{order:1}
+}
+.ing-img{
+  background:#0D0B09;border:.5px solid rgba(201,167,82,0.15);
+  aspect-ratio:4/3;display:flex;align-items:center;justify-content:center;
+  position:relative;overflow:hidden;border-radius:2px;
+}
+.ing-img::before{content:"";position:absolute;inset:0;background:repeating-linear-gradient(135deg, rgba(201,167,82,0.04) 0 1px, transparent 1px 22px);pointer-events:none}
+.ing-img-label{font-family:'Cormorant Garamond',serif;font-style:italic;font-size:36px;color:rgba(201,167,82,0.3);text-align:center;padding:0 24px;line-height:1.1}
+@media(min-width:1024px){.ing-img{aspect-ratio:3/4}.ing-img-label{font-size:48px}}
+.ing-text{padding:0}
+@media(min-width:1024px){.ing-text{padding:40px 0}}
+.ing-latin{font-family:'Jost',sans-serif;font-weight:200;font-size:10px;letter-spacing:4px;text-transform:uppercase;color:rgba(201,167,82,0.6)}
+.ing-title{font-family:'Cormorant Garamond',serif;font-weight:300;font-size:32px;color:var(--gold);line-height:1.1;margin-top:14px}
+@media(min-width:1024px){.ing-title{font-size:44px}}
+.ing-body{font-family:'Jost',sans-serif;font-weight:300;font-size:14px;color:rgba(237,232,223,0.75);line-height:1.9;margin-top:20px;max-width:500px}
+
+/* parallax-y reveal */
+@supports (animation-timeline: view()){
+  .ing-img{animation:parallaxImg linear both;animation-timeline:view();animation-range:entry 0% exit 100%}
+  .ing-text{animation:parallaxText linear both;animation-timeline:view();animation-range:entry 0% entry 90%}
+}
+@keyframes parallaxImg{from{transform:translateY(40px)}to{transform:translateY(-40px)}}
+@keyframes parallaxText{from{opacity:0;transform:translateY(30px)}to{opacity:1;transform:none}}
+
+/* ─────────── SECTION 5 — SPLIT ─────────── */
+.split{
+  display:grid;grid-template-columns:1fr;
+  position:relative;
+  background:var(--black);
+  z-index:3;
+  overflow:hidden;
+}
+@media(min-width:1024px){.split{grid-template-columns:1fr 1fr}}
+
+/* Block — full panel, positions image behind content */
+.split-block{
+  padding:0;
+  position:relative;
+  z-index:2;
+  display:flex;
+  flex-direction:column;
+  justify-content:flex-end;
+  min-height:600px;
+}
+@media(min-width:1024px){.split-block{min-height:90vh}}
+.split-block.women{background:var(--cream);color:var(--black)}
+.split-block.men{background:var(--black);color:var(--text-cream)}
+
+/* FIX 1 — Image fills entire panel, sits behind content */
+.split-img{
+  position:absolute;
+  top:0;left:0;
+  width:100%;height:100%;
+  z-index:0;
+  background-size:cover;
+  background-position:center top;
+}
+/* FIX 5 — No hard edge: gradient fades image into panel background */
+#para-ella-image{
+  background:
+    linear-gradient(180deg,
+      rgba(247,243,237,0) 30%,
+      rgba(247,243,237,0.95) 75%,
+      rgba(247,243,237,1) 100%),
+    url('https://tempfile.aiquickdraw.com/workers/nano/image_1777236759448_97yabp.png');
+  background-size:cover;
+  background-position:center top;
+}
+#para-el-image{
+  background:
+    linear-gradient(180deg,
+      rgba(8,8,8,0) 30%,
+      rgba(8,8,8,0.92) 75%,
+      rgba(8,8,8,1) 100%),
+    url('https://tempfile.aiquickdraw.com/images/1777237311403-u3zdmhpk4tp.png');
+  background-size:cover;
+  background-position:center top;
+}
+
+/* Content overlaid on image — z-index above image */
+.split-content{
+  position:relative;
+  z-index:1;
+  display:flex;
+  flex-direction:column;
+  justify-content:flex-end;
+  padding:40px 24px;
+}
+@media(min-width:1024px){.split-content{padding:48px 60px}}
+
+.split-label{font-family:'Cormorant Garamond',serif;font-style:italic;font-weight:300;font-size:13px;letter-spacing:4px;color:var(--gold);text-transform:uppercase}
+.split-h2{font-family:'Cormorant Garamond',serif;font-weight:300;font-size:32px;line-height:1.1;margin-top:18px;white-space:pre-line}
+@media(min-width:1024px){.split-h2{font-size:44px}}
+.split-block.women .split-h2{color:var(--black)}
+.split-block.men .split-h2{color:var(--cream)}
+.split-body{font-family:'Jost',sans-serif;font-weight:300;font-size:14px;line-height:1.85;margin-top:20px;max-width:440px}
+.split-block.women .split-body{color:var(--text-muted)}
+.split-block.men .split-body{color:rgba(237,232,223,0.7)}
+.split-cta{margin-top:32px}
+
+/* Button overrides per panel */
+.split-block.women .btn-outline{
+  background:transparent;
+  border:.5px solid #080808;
+  color:#080808;
+  letter-spacing:4px;
+  transition:all 0.3s ease;
+}
+.split-block.women .btn-outline:hover{background:#080808;color:#F7F3ED}
+.split-block.men .btn-ghost{
+  background:transparent;
+  border:.5px solid #C9A752;
+  color:#C9A752;
+  letter-spacing:4px;
+  transition:all 0.3s ease;
+}
+.split-block.men .btn-ghost:hover{background:#C9A752;color:#080808}
+
+/* CHANGE 3 — Scroll reveal initial state */
+.split-block.women{
+  opacity:0;
+  transform:translateX(-60px);
+  transition:opacity 0.8s ease-out, transform 0.8s ease-out;
+}
+.split-block.men{
+  opacity:0;
+  transform:translateX(60px);
+  transition:opacity 0.8s ease-out, transform 0.8s ease-out;
+  transition-delay:0.15s;
+}
+.split-block.women.split-visible,
+.split-block.men.split-visible{
+  opacity:1;
+  transform:translateX(0);
+}
+/* Disable old scroll-driven animation that conflicts */
+@supports(animation-timeline:view()){
+  @media(min-width:1024px){
+    .split-block.women{animation:none}
+  }
+}
+
+/* FIX 4 — Vertical gold divider, gradient, IO-triggered */
+@media(min-width:1024px){
+  .split::after{
+    content:"";
+    position:absolute;
+    left:50%;top:0;bottom:0;
+    width:1px;
+    background:linear-gradient(180deg,
+      transparent 0%,
+      #C9A752 20%,
+      #C9A752 80%,
+      transparent 100%);
+    transform:scaleY(0);
+    transform-origin:top;
+    transition:transform 1.2s ease-out;
+    z-index:10;
+  }
+  .split.in::after{transform:scaleY(1)}
+}
+
+/* ─────────── SECTION 6 — RITUAL ─────────── */
+.ritual{
+  background:var(--cream);
+  color:var(--black);
+  padding:120px 24px;
+  position:relative;z-index:3;
+}
+@media(min-width:1024px){.ritual{padding:160px 80px}}
+.ritual .section-h2{color:var(--black)}
+.ritual-mobile{display:block;position:relative;max-width:560px;margin:0 auto}
+.ritual-mobile::before{content:"";position:absolute;left:8px;top:0;bottom:0;width:.5px;background:var(--gold)}
+.ritual-step{padding-left:48px;padding-bottom:48px;position:relative}
+.ritual-step:last-child{padding-bottom:0}
+.ritual-num{font-family:'Cormorant Garamond',serif;font-weight:300;font-size:64px;color:var(--gold);line-height:1;display:inline-block}
+.ritual-num .digit{display:inline-block;min-width:1ch}
+.ritual-title{font-family:'Cormorant Garamond',serif;font-weight:300;font-size:22px;color:var(--black);margin-top:8px}
+.ritual-body{font-family:'Jost',sans-serif;font-weight:300;font-size:13px;color:var(--text-muted);line-height:1.8;margin-top:10px;max-width:380px}
+.ritual-desktop{display:none}
+@media(min-width:1024px){
+  .ritual-mobile{display:none}
+  .ritual-desktop{display:grid;grid-template-columns:1fr 1fr 1fr;gap:48px;max-width:1200px;margin:0 auto;position:relative;padding-top:24px}
+  .ritual-desktop::before{content:"";position:absolute;top:60px;left:6%;right:6%;height:.5px;background:var(--gold);transform:scaleX(0);transform-origin:left;transition:transform 1.2s ease}
+  .ritual-desktop.in::before{transform:scaleX(1)}
+  .ritual-desktop .ritual-num{font-size:80px}
+  .ritual-desktop .ritual-title{font-size:24px;margin-top:16px}
+  .ritual-desktop .ritual-body{font-size:14px}
+}
+
+/* ─────────── SECTION 7 — TESTIMONIALS ─────────── */
+.testimonials{
+  background:var(--black);
+  color:var(--text-cream);
+  padding:120px 24px;
+  position:relative;z-index:3;
+}
+@media(min-width:1024px){.testimonials{padding:160px 80px}}
+.testimonials .section-h2{color:var(--cream)}
+.pull{max-width:780px;margin:0 auto;text-align:center;position:relative;padding:0 12px}
+.pull-q{font-family:'Cormorant Garamond',serif;font-weight:300;font-style:italic;font-size:22px;color:var(--gold);line-height:1.4;min-height:1.4em}
+@media(min-width:1024px){.pull-q{font-size:28px}}
+.pull-q::before{content:"“";display:block;font-family:'Cormorant Garamond',serif;font-weight:300;font-size:120px;color:var(--gold);opacity:.3;line-height:0;margin-bottom:32px}
+/* type-on caret */
+.pull-q .caret{display:inline-block;width:1px;background:var(--gold);height:1em;vertical-align:middle;margin-left:4px;animation:blink 1s steps(1) infinite;opacity:0}
+.pull-q.typing .caret{opacity:1}
+@keyframes blink{50%{opacity:0}}
+.pull-attr{font-family:'Jost',sans-serif;font-weight:300;font-size:11px;letter-spacing:3px;text-transform:uppercase;color:rgba(237,232,223,0.5);margin-top:32px}
+.t-grid{display:grid;grid-template-columns:1fr;gap:16px;max-width:1200px;margin:48px auto 0}
+@media(min-width:1024px){.t-grid{grid-template-columns:1fr 1fr 1fr}}
+.t-card{background:#0D0B09;border:.5px solid rgba(201,167,82,0.25);border-radius:2px;padding:28px}
+.t-stars{color:var(--gold);font-size:13px;letter-spacing:3px}
+.t-q{font-family:'Cormorant Garamond',serif;font-weight:300;font-style:italic;font-size:17px;color:rgba(237,232,223,0.8);line-height:1.8;margin-top:18px}
+.t-name{font-family:'Jost',sans-serif;font-weight:400;font-size:10px;color:var(--gold);letter-spacing:3px;text-transform:uppercase;margin-top:24px}
+.t-loc{font-family:'Jost',sans-serif;font-weight:200;font-size:10px;color:rgba(237,232,223,0.4);margin-top:4px;letter-spacing:1px}
+@supports (animation-timeline: view()){
+  .t-card{animation:rise linear both;animation-timeline:view();animation-range:entry 0% entry 80%}
+}
+.orn-line{display:block;width:60px;height:.5px;background:var(--gold);margin:48px auto;border:none;opacity:.6}
+
+/* ─────────── SECTION 8 — SHOP ─────────── */
+.shop{
+  background:var(--black);
+  color:var(--text-cream);
+  text-align:center;
+  padding:140px 24px 100px;
+  position:relative;z-index:3;
+  overflow:hidden;
+}
+.shop-orn-top{display:block;width:80px;height:.5px;background:var(--gold);margin:0 auto 40px}
+.shop-zayt{
+  font-family:'Cormorant Garamond',serif;font-weight:300;
+  font-size:72px;color:var(--gold);letter-spacing:14px;line-height:1;
+  display:inline-block;
+  transform-origin:center;
+}
+@media(min-width:1024px){.shop-zayt{font-size:100px;letter-spacing:16px}}
+@supports (animation-timeline: view()){
+  .shop-zayt{
+    animation:zoomIn linear both;
+    animation-timeline:view();
+    animation-range:entry 0% cover 60%;
+  }
+}
+@keyframes zoomIn{
+  from{transform:scale(.4);letter-spacing:6px;opacity:.4}
+  to{transform:scale(1);letter-spacing:16px;opacity:1}
+}
+.shop-elixir{font-family:'Cormorant Garamond',serif;font-weight:300;font-style:italic;font-size:20px;color:var(--gold-light);margin-top:14px}
+.shop-orn{color:var(--gold);font-size:16px;margin:24px 0}
+.shop-desc{font-family:'Jost',sans-serif;font-weight:200;font-size:11px;letter-spacing:4px;text-transform:uppercase;color:rgba(237,232,223,0.5)}
+.shop-price-row{margin-top:32px}
+.shop-price{font-family:'Jost',sans-serif;font-weight:200;font-size:40px;color:var(--cream);line-height:1}
+@media(min-width:1024px){.shop-price{font-size:48px}}
+.shop-pay{font-family:'Jost',sans-serif;font-weight:200;font-size:12px;color:rgba(201,167,82,0.7);margin-top:8px}
+.shop-cta{margin:32px auto 0;max-width:360px}
+.shop-cta .btn{height:58px;font-size:12px;letter-spacing:5px}
+.shop-ship{font-family:'Jost',sans-serif;font-weight:200;font-size:11px;color:rgba(232,213,160,0.7);letter-spacing:2px;margin-top:16px}
+.shop-badges{font-family:'Jost',sans-serif;font-weight:200;font-size:9px;color:rgba(237,232,223,0.3);letter-spacing:2px;text-transform:uppercase;margin-top:24px}
+.shop-badges span{margin:0 8px}
+@supports (animation-timeline: view()){
+  .shop-rise{animation:riseUp linear both;animation-timeline:view();animation-range:entry 20% cover 70%}
+}
+@keyframes riseUp{from{opacity:0;transform:translateY(40px)}to{opacity:1;transform:none}}
+
+/* ─────────── FOOTER ─────────── */
+.foot{background:var(--black);border-top:.5px solid rgba(201,167,82,0.3);padding:60px 24px 40px;color:var(--text-cream);position:relative;z-index:3}
+.foot-top{text-align:center}
+.foot-brand{font-family:'Cormorant Garamond',serif;font-weight:300;font-size:28px;color:var(--gold);letter-spacing:10px}
+.foot-tag{font-family:'Cormorant Garamond',serif;font-style:italic;font-size:13px;color:rgba(201,167,82,0.5);margin-top:6px}
+.foot-orn{display:block;width:40px;height:.5px;background:var(--gold);margin:16px auto;opacity:.6}
+.foot-links{display:grid;grid-template-columns:1fr 1fr;gap:8px 24px;margin:48px auto 0;max-width:520px}
+.foot-col{display:flex;flex-direction:column;gap:10px}
+@media(min-width:1024px){.foot-links{display:flex;justify-content:center;gap:48px;max-width:none}.foot-col{align-items:flex-start}}
+.foot-link{font-family:'Jost',sans-serif;font-weight:200;font-size:11px;color:rgba(237,232,223,0.4);letter-spacing:2px;transition:color .3s ease}
+.foot-link:hover{color:rgba(237,232,223,0.85)}
+.foot-lang{display:flex;justify-content:center;gap:14px;margin-top:48px;align-items:center;color:var(--cream)}
+.foot-bottom{border-top:.5px solid rgba(201,167,82,0.1);margin-top:40px;padding-top:24px;text-align:center}
+.foot-copy{font-family:'Jost',sans-serif;font-weight:200;font-size:10px;color:rgba(237,232,223,0.25);letter-spacing:1px}
+
+/* reduced motion */
+@media (prefers-reduced-motion: reduce){
+  *{transition:none!important;animation:none!important}
+}
+
+/* ═══════════════════════════════════════════
+   LUXURY ENHANCEMENTS — ZAYT Cinematic Layer
+   ═══════════════════════════════════════════ */
+
+/* ─── Custom cursor ─── */
+.cursor-dot{
+  position:fixed;width:5px;height:5px;
+  background:var(--gold);border-radius:50%;
+  pointer-events:none;z-index:99999;
+  transform:translate(-50%,-50%);
+  transition:transform .1s ease,opacity .25s ease;
+  mix-blend-mode:normal;
+  opacity:0;
+  left:-100px;top:-100px;
+}
+.cursor-ring{
+  position:fixed;width:38px;height:38px;
+  border:.5px solid rgba(201,167,82,.5);border-radius:50%;
+  pointer-events:none;z-index:99998;
+  transform:translate(-50%,-50%);
+  transition:width .35s cubic-bezier(.23,1,.32,1),
+             height .35s cubic-bezier(.23,1,.32,1),
+             border-color .35s ease,
+             opacity .3s ease;
+  opacity:0;
+  left:-100px;top:-100px;
+}
+.cursor-ring.hovering{
+  width:60px;height:60px;
+  border-color:rgba(201,167,82,.85);
+}
+.cursor-ring.clicking{
+  width:24px;height:24px;
+  background:rgba(201,167,82,.15);
+}
+@media(hover:none){.cursor-dot,.cursor-ring{display:none}}
+
+/* ─── Scroll progress bar ─── */
+.scroll-progress{
+  position:fixed;top:0;left:0;height:1px;
+  background:linear-gradient(90deg,var(--gold-dark),var(--gold),var(--gold-light));
+  z-index:99997;width:0%;
+  box-shadow:0 0 6px rgba(201,167,82,.5);
+  pointer-events:none;
+}
+
+/* ─── Floating botanical particles (hero) ─── */
+.hero-particles{
+  position:absolute;inset:0;z-index:1;
+  pointer-events:none;overflow:hidden;
+}
+.particle{
+  position:absolute;border-radius:50%;
+  background:rgba(201,167,82,.18);
+  animation:particleRise linear infinite;
+  will-change:transform,opacity;
+}
+@keyframes particleRise{
+  0%{transform:translateY(110vh) scale(1) rotate(0deg);opacity:0}
+  8%{opacity:1}
+  90%{opacity:.6}
+  100%{transform:translateY(-15vh) scale(.4) rotate(540deg);opacity:0}
+}
+
+/* ─── Nav link underline sweep ─── */
+.nav-link{position:relative}
+.nav-link::after{
+  content:'';position:absolute;bottom:-3px;left:0;right:0;
+  height:.5px;background:var(--gold);
+  transform:scaleX(0);transform-origin:center;
+  transition:transform .35s cubic-bezier(.23,1,.32,1);
+}
+.nav-link:hover::after{transform:scaleX(1)}
+
+/* ─── Section head reveal ─── */
+.s-reveal{
+  opacity:0;transform:translateY(36px);
+  transition:opacity 1s cubic-bezier(.16,1,.3,1),
+             transform 1s cubic-bezier(.16,1,.3,1);
+}
+.s-reveal.visible{opacity:1;transform:none}
+.s-reveal-delay-1{transition-delay:.15s}
+.s-reveal-delay-2{transition-delay:.3s}
+.s-reveal-delay-3{transition-delay:.45s}
+
+/* ─── Benefit cards — reveal state + hover ─── */
+.b-card{
+  opacity:0;
+  transform:translateY(40px);
+  transition:all 0.3s ease;
+}
+.b-card.b-visible{
+  opacity:1;
+  transform:translateY(0);
+}
+.b-card:hover{
+  transform:translateY(-6px);
+  border:.5px solid #C9A752;
+  box-shadow:0 20px 40px rgba(201,167,82,0.08);
+}
+
+/* ─── Ingredient images — 3D tilt + glow ─── */
+.ing-img{
+  transition:transform .6s cubic-bezier(.23,1,.32,1),
+             box-shadow .6s ease;
+  transform-style:preserve-3d;
+  will-change:transform;
+  cursor:default;
+}
+.ing-img:hover{
+  box-shadow:0 32px 64px rgba(0,0,0,.55),
+             0 0 40px rgba(201,167,82,.08);
+}
+#ingredient-1-image{
+  background-image:url('https://tempfile.aiquickdraw.com/workers/nano/image_1777233445798_0k1twc.png');
+  background-size:cover;
+  background-position:center center;
+  background-repeat:no-repeat;
+}
+
+/* ─── Argan seed particles ─── */
+.argan-particles{
+  position:absolute;
+  inset:0;
+  pointer-events:none;
+  overflow:hidden;
+  z-index:2;
+}
+.argan-seed{
+  position:absolute;
+  top:0;
+  border-radius:45% 55% 55% 45% / 60% 60% 40% 40%;
+  background:rgba(201,167,82,0.6);
+  pointer-events:none;
+  will-change:transform,opacity;
+  animation:arganFall linear infinite;
+}
+@keyframes arganFall{
+  0%{
+    transform:translateY(-16px) rotate(0deg);
+    opacity:0;
+  }
+  8%{opacity:1}
+  88%{opacity:0.55}
+  100%{
+    transform:translateY(900px) rotate(400deg);
+    opacity:0;
+  }
+}
+#ingredient-2-image{
+  background:
+    linear-gradient(135deg,rgba(0,0,0,0.35) 0%,rgba(0,0,0,0.08) 100%),
+    url('https://tempfile.aiquickdraw.com/images/1777234216238-xearoq75h4.png');
+  background-size:cover;
+  background-position:center;
+}
+#ingredient-2-image::before{ display:none; }
+
+/* ─── Romero — text scroll reveal ─── */
+.ing2-reveal{
+  opacity:0;
+  transform:translateX(-40px);
+  transition:opacity 0.8s ease-out,transform 0.8s ease-out;
+}
+.ing2-reveal.ing2-visible{
+  opacity:1;
+  transform:translateX(0);
+}
+
+/* ─── Romero — needle particles ─── */
+.rosemary-particles{
+  position:absolute;
+  inset:0;
+  pointer-events:none;
+  overflow:hidden;
+  z-index:2;
+}
+.rosemary-needle{
+  position:absolute;
+  bottom:-12px;
+  width:2px;
+  height:8px;
+  border-radius:2px;
+  background:rgba(120,180,90,0.35);
+  pointer-events:none;
+  will-change:transform,opacity;
+  animation:rosemaryFloat linear infinite;
+}
+@keyframes rosemaryFloat{
+  0%{
+    transform:translateY(0) rotate(var(--rot,0deg));
+    opacity:0;
+  }
+  8%{opacity:0.35}
+  90%{opacity:0.3}
+  100%{
+    transform:translateY(-700px) rotate(calc(var(--rot,0deg) + 50deg));
+    opacity:0;
+  }
+}
+#ingredient-3-image{
+  background:
+    linear-gradient(135deg,rgba(0,0,0,0.45) 0%,rgba(0,0,0,0.15) 100%),
+    url('https://tempfile.aiquickdraw.com/workers/nano/image_1777236040419_ms2zpk.png');
+  background-size:cover;
+  background-position:center;
+}
+#ingredient-3-image::before{ display:none; }
+
+/* ─── Nigella Sativa — seed particles (right text panel) ─── */
+#ingredient-3-text{
+  position:relative;
+  overflow:hidden;
+}
+.nigella-particles{
+  position:absolute;
+  inset:0;
+  pointer-events:none;
+  overflow:hidden;
+  z-index:0;
+}
+#ingredient-3-text > *:not(.nigella-particles){
+  position:relative;
+  z-index:1;
+}
+.nigella-seed{
+  position:absolute;
+  bottom:-6px;
+  width:3px;
+  height:3px;
+  border-radius:50%;
+  background:rgba(201,167,82,0.25);
+  animation:nigellaFloat linear infinite;
+}
+@keyframes nigellaFloat{
+  0%{ transform:translateY(0); opacity:0; }
+  8%{ opacity:0.25; }
+  90%{ opacity:0.2; }
+  100%{ transform:translateY(-800px); opacity:0; }
+}
+
+.ing-img::after{
+  content:'';position:absolute;inset:0;
+  background:radial-gradient(circle at 55% 40%,rgba(201,167,82,.11) 0%,transparent 65%);
+  pointer-events:none;
+}
+
+/* ─── Testimonial cards — shimmer sweep ─── */
+.t-card{
+  position:relative;overflow:hidden;
+  transition:transform .45s cubic-bezier(.23,1,.32,1),
+             box-shadow .45s ease,
+             border-color .45s ease;
+}
+.t-card::before{
+  content:'';position:absolute;
+  top:0;left:-80%;width:50%;height:100%;
+  background:linear-gradient(90deg,transparent,rgba(201,167,82,.07),transparent);
+  transform:skewX(-18deg);
+  transition:left .7s ease;
+  pointer-events:none;
+}
+.t-card:hover::before{left:160%}
+.t-card:hover{
+  transform:translateY(-8px);
+  border-color:rgba(201,167,82,.55);
+  box-shadow:0 24px 48px rgba(0,0,0,.45);
+}
+
+/* ─── Buttons — light sweep + magnetic ─── */
+.btn-primary{position:relative;overflow:hidden}
+.btn-primary::after{
+  content:'';position:absolute;inset:0;
+  background:radial-gradient(
+    circle at var(--mx,50%) var(--my,50%),
+    rgba(255,255,255,.18) 0%,transparent 55%
+  );
+  opacity:0;transition:opacity .3s ease;
+  pointer-events:none;
+}
+.btn-primary:hover::after{opacity:1}
+
+.btn-ghost{position:relative;overflow:hidden}
+.btn-ghost::after{
+  content:'';position:absolute;inset:0;
+  background:radial-gradient(
+    circle at var(--mx,50%) var(--my,50%),
+    rgba(201,167,82,.15) 0%,transparent 55%
+  );
+  opacity:0;transition:opacity .3s ease;
+  pointer-events:none;
+}
+.btn-ghost:hover::after{opacity:1}
+
+/* ─── Shop ZAYT — gold shimmer ─── */
+.shop-zayt-wrap{
+  position:relative;display:inline-block;
+  overflow:hidden;
+}
+.shop-zayt-shine{
+  position:absolute;top:0;left:-120%;width:60%;height:100%;
+  background:linear-gradient(90deg,transparent,rgba(255,255,255,.22),transparent);
+  transform:skewX(-18deg);
+  animation:shinePass 4s ease-in-out infinite;
+  pointer-events:none;
+}
+@keyframes shinePass{
+  0%{left:-120%}
+  40%,100%{left:180%}
+}
+
+/* ─── Pull quote decorative lines ─── */
+.pull{position:relative}
+.pull::before,.pull::after{
+  content:'';position:absolute;
+  left:50%;transform:translateX(-50%) scaleX(0);
+  width:120px;height:.5px;
+  background:linear-gradient(90deg,transparent,var(--gold),transparent);
+  transform-origin:center;
+  transition:transform 1s cubic-bezier(.23,1,.32,1);
+}
+.pull::before{top:-28px}
+.pull::after{bottom:-28px}
+.pull.lines-in::before,.pull.lines-in::after{
+  transform:translateX(-50%) scaleX(1);
+}
+
+/* ─── Shop section ambient glow ─── */
+.shop{
+  background:radial-gradient(ellipse at 50% 10%,rgba(201,167,82,.055) 0%,transparent 55%),
+             var(--black);
+}
+
+/* ─── Ingredient block separators ─── */
+.ing-block+.ing-block{
+  border-top:.5px solid rgba(201,167,82,.07);
+}
+
+/* ─── Drawer link hover ─── */
+.drawer-link{
+  transition:color .35s ease,letter-spacing .35s cubic-bezier(.23,1,.32,1);
+}
+.drawer-link:hover{color:var(--gold);letter-spacing:4px}
+
+/* ─── Footer brand hover glow ─── */
+.foot-brand{
+  transition:text-shadow .4s ease;
+  cursor:default;
+}
+.foot-brand:hover{
+  text-shadow:0 0 32px rgba(201,167,82,.45);
+}
+
+/* ─── Ritual step desktop hover ─── */
+@media(min-width:1024px){
+  .ritual-desktop .ritual-step{
+    transition:transform .45s cubic-bezier(.23,1,.32,1);
+  }
+  .ritual-desktop .ritual-step:hover{transform:translateY(-10px)}
+}
+
+/* ─── Gold rule pulse ─── */
+.gold-rule.in::before{
+  animation:rulePulse 3s ease-in-out infinite;
+}
+@keyframes rulePulse{
+  0%,100%{box-shadow:none}
+  50%{box-shadow:0 0 8px rgba(201,167,82,.35)}
+}
+
+/* ─── Hero stat line ─── */
+.hero-mw::before{
+  content:'';display:inline-block;
+  width:18px;height:.5px;
+  background:var(--gold);vertical-align:middle;
+  margin-right:8px;flex-shrink:0;
+}
+
+/* making-video aspect ratio handled above in Section 2 block */
+
+/* ═══════════════════════════════════════
+   CINEMATIC SECTION TRANSITIONS
+   ═══════════════════════════════════════ */
+
+/* ─── Hero → Section 2: making slides up from below ─── */
+@supports(animation-timeline:view()){
+  .making{
+    animation:makingReveal linear both;
+    animation-timeline:view();
+    animation-range:entry 0% entry 50%;
+  }
+}
+@keyframes makingReveal{
+  from{clip-path:inset(8% 0 0 0);opacity:0.6;transform:translateY(24px)}
+  to{clip-path:inset(0% 0 0 0);opacity:1;transform:translateY(0)}
+}
+
+/* ─── Section 2 → 3  (dark → cream)
+   Benefits rises like a stage platform from below.
+   Uses CSS scroll-driven animation — no JS, no spotlight. ─── */
+@supports(animation-timeline:view()){
+  .benefits{
+    animation:platformRise linear both;
+    animation-timeline:view();
+    animation-range:entry 0% entry 55%;
+    transform-origin:bottom center;
+  }
+}
+@keyframes platformRise{
+  from{
+    clip-path:inset(100% 0 0 0);
+    transform:perspective(1400px) rotateX(-4deg) scale(0.99);
+  }
+  to{
+    clip-path:inset(0% 0 0 0);
+    transform:perspective(1400px) rotateX(0deg) scale(1);
+  }
+}
+
+/* ─── Section 3 → 4  (cream → dark)
+   Ingredients panel drops in from top like a theatre curtain. ─── */
+@supports(animation-timeline:view()){
+  .ingredients{
+    animation:curtainDrop linear both;
+    animation-timeline:view();
+    animation-range:entry 0% entry 45%;
+  }
+}
+@keyframes curtainDrop{
+  from{
+    clip-path:inset(0 0 100% 0);
+    opacity:0.7;
+  }
+  to{
+    clip-path:inset(0 0 0% 0);
+    opacity:1;
+  }
+}
+</style>
+</head>
+<body data-cc-id="cc-1" style="background-color: rgb(10, 10, 10); cursor: crosshair;">
+
+<div class="cursor-dot" id="cursor-dot"></div>
+<div class="cursor-ring" id="cursor-ring"></div>
+<div class="scroll-progress" id="scroll-progress"></div>
+
+<!-- ── Continuous background layers (driven by JS scroll progress) ── -->
+<div class="bg-canvas" id="bg-canvas"></div>
+<div class="bg-dark-layer" id="bg-dark" style="mask-image: none; opacity: 1;"></div>
+
+<!-- ── Sticky bottle (always behind text, drives the cinematic feel) ── -->
+<div class="bottle-stage" id="bottle-stage" aria-hidden="true" style="display: block;">
+  <div class="bottle" id="bottle" style="transform: translate(-50%, -50%) translate(0px, 0px) scale(1); opacity: 0.9; border-radius: 0%;">
+    <video id="hero-video" autoplay="" muted="" loop="" playsinline="" preload="auto">
+      <source src="https://raw.githubusercontent.com/Abidzayt/zayt-assets/main/8727b944575757b71f793b875290b86f_1_1777291615_9057.mp4" type="video/mp4">
+    </video>
+  </div>
+</div>
+
+<!-- ────────── NAV ────────── -->
+<nav class="nav on-dark" id="nav">
+  <a class="nav-brand" href="#" data-i18n="brand">ZAYT</a>
+  <div class="nav-center">
+    <a class="nav-link" href="ZAYT.html" data-i18n="nav.home">Inicio</a>
+    <a class="nav-link" href="producto.html" data-i18n="nav.elixir">El Elixir</a>
+    <a class="nav-link" href="ingredientes.html" data-i18n="nav.ingredients">Ingredientes</a>
+    <a class="nav-link" href="articulos.html" data-i18n="nav.articles">Artículos</a>
+    <a class="nav-link" href="nosotros.html" data-i18n="nav.about">Nosotros</a>
+  </div>
+  <div class="nav-right">
+    <div class="lang-switcher" id="lang-switcher">
+      <button class="lang-btn active" data-lang="es">ES</button>
+      <span class="lang-sep">·</span>
+      <button class="lang-btn" data-lang="en">EN</button>
+      <span class="lang-sep">·</span>
+      <button class="lang-btn" data-lang="fr">FR</button>
+    </div>
+    <a href="producto.html" class="btn btn-ghost" data-i18n="nav.shop">Comprar</a>
+    <button class="hamburger" id="hamburger" aria-label="Menu"><span></span><span></span><span></span></button>
+  </div>
+</nav>
+
+<aside class="drawer" id="drawer">
+  <button class="drawer-close" id="drawer-close">×</button>
+  <div class="drawer-brand">ZAYT</div>
+  <div class="drawer-orn"></div>
+  <div class="drawer-links">
+    <a class="drawer-link" href="ZAYT.html" data-i18n="nav.home">Inicio</a>
+    <a class="drawer-link" href="producto.html" data-i18n="nav.elixir">El Elixir</a>
+    <a class="drawer-link" href="ingredientes.html" data-i18n="nav.ingredients">Ingredientes</a>
+    <a class="drawer-link" href="articulos.html" data-i18n="nav.articles">Artículos</a>
+    <a class="drawer-link" href="nosotros.html" data-i18n="nav.about">Nosotros</a>
+  </div>
+  <div class="drawer-bottom">
+    <button class="lang-btn active" data-lang="es">ES</button>
+    <span class="lang-sep">·</span>
+    <button class="lang-btn" data-lang="en">EN</button>
+    <span class="lang-sep">·</span>
+    <button class="lang-btn" data-lang="fr">FR</button>
+  </div>
+</aside>
+
+<!-- ────────── HERO ────────── -->
+<section class="hero" id="hero" data-screen-label="01 Hero" data-bg="dark">
+  <div class="hero-overlay"></div>
+  <div class="hero-top-vignette"></div>
+  <div class="hero-content">
+    <div class="hero-eyebrow" data-i18n="hero.eyebrow">Elixir Botanique</div>
+    <h1 class="hero-h1">
+      <span class="ln ln-1" data-i18n="hero.l1">Oro</span>
+      <span class="ln ln-2" data-i18n="hero.l2">Líquido.</span>
+    </h1>
+    <p class="hero-sub" data-i18n="hero.sub">Elixir botánico · Hecho a mano en España.</p>
+    <div class="hero-cta">
+      <a href="#shop" class="btn btn-primary" data-i18n="cta.shop">Comprar Ahora</a>
+      <a href="#making" class="hero-cta-link" data-i18n="cta.discover">Descubrir →</a>
+    </div>
+  </div>
+  <div class="hero-scroll">
+    <div class="hero-scroll-line"></div>
+    <div class="hero-scroll-text" data-i18n="hero.scroll">Scroll</div>
+  </div>
+</section>
+
+<!-- ────────── SECTION 2 — RESPALDADO POR LA CIENCIA ────────── -->
+<section class="section making" id="making" data-screen-label="02 Ciencia" data-bg="dark">
+
+  <!-- Background video -->
+  <div class="making-bg-video" aria-hidden="true">
+    <video autoplay muted loop playsinline preload="auto">
+      <source src="https://raw.githubusercontent.com/Abidzayt/zayt-assets/main/6e2cd1cff006cd3adfc31a6ebebf3fb6_1_1777294080_1836.mp4" type="video/mp4">
+    </video>
+  </div>
+
+  <!-- Dark overlay -->
+  <div class="making-overlay" aria-hidden="true"></div>
+
+  <!-- Foreground content -->
+  <div class="making-inner">
+
+    <!-- Label -->
+    <div class="making-sci-label">Respaldado por la Ciencia</div>
+
+    <!-- 4 certification cards -->
+    <div class="sci-cards" id="sci-cards">
+      <div class="sci-card">
+        <span class="sci-card-orn">✦</span>
+        <div class="sci-card-title">100%<br>Botánico</div>
+      </div>
+      <div class="sci-card">
+        <span class="sci-card-orn">✦</span>
+        <div class="sci-card-title">Sin<br>Sulfatos</div>
+      </div>
+      <div class="sci-card">
+        <span class="sci-card-orn">✦</span>
+        <div class="sci-card-title">Sin<br>Parabenos</div>
+      </div>
+      <div class="sci-card">
+        <span class="sci-card-orn">✦</span>
+        <div class="sci-card-title">Dermatológicamente<br>Testado</div>
+      </div>
+    </div>
+
+    <!-- 3 stats -->
+    <div class="sci-stats" id="sci-stats">
+      <div class="sci-stat">
+        <span class="sci-stat-number" data-target="97" data-suffix="%">0%</span>
+        <span class="sci-stat-label">de clientes satisfechos</span>
+      </div>
+      <div class="sci-stat">
+        <span class="sci-stat-number" data-target="100" data-suffix="%">0%</span>
+        <span class="sci-stat-label">ingredientes naturales</span>
+      </div>
+      <div class="sci-stat">
+        <span class="sci-stat-number" data-target="0" data-suffix="">0</span>
+        <span class="sci-stat-label">químicos agresivos</span>
+      </div>
+    </div>
+
+    <!-- Expert quote -->
+    <div class="sci-quote">
+      <p class="sci-quote-text">"Formulado con los mejores ingredientes<br>botánicos conocidos por la ciencia"</p>
+      <span class="sci-quote-attr">— Equipo Científico ZAYT</span>
+    </div>
+
+  </div>
+</section>
+
+<!-- ────────── SECTION 3 — BENEFITS (cream, revealed via spotlight) ────────── -->
+<section class="section benefits" id="benefits" data-screen-label="03 Benefits" data-bg="cream">
+  <div class="section-head">
+    <span class="label" data-i18n="benefits.label">Por qué ZAYT</span>
+    <h2 class="section-h2" data-i18n="benefits.h2" style="margin-top:18px">Un Elixir para Todo</h2>
+    <p class="section-sub" data-i18n="benefits.sub">No solo para la caída. Para la salud total del cabello.</p>
+  </div>
+  <div class="benefits-grid">
+    <div class="b-card"><div class="b-orn">✦</div><h3 class="b-title" data-i18n="b1.t">Detiene la Caída</h3><p class="b-body" data-i18n="b1.b">Reduce visiblemente la caída desde la primera semana de uso.</p></div>
+    <div class="b-card"><div class="b-orn">✦</div><h3 class="b-title" data-i18n="b2.t">Estimula el Crecimiento</h3><p class="b-body" data-i18n="b2.b">Activa los folículos dormidos y acelera el ciclo de regeneración.</p></div>
+    <div class="b-card"><div class="b-orn">✦</div><h3 class="b-title" data-i18n="b3.t">Nutre el Cuero Cabelludo</h3><p class="b-body" data-i18n="b3.b">Hidratación profunda sin residuos grasos ni pesadez.</p></div>
+    <div class="b-card"><div class="b-orn">✦</div><h3 class="b-title" data-i18n="b4.t">Aporta Brillo Intenso</h3><p class="b-body" data-i18n="b4.b">Cabello sano, luminoso y sedoso al tacto desde la primera aplicación.</p></div>
+    <div class="b-card"><div class="b-orn">✦</div><h3 class="b-title" data-i18n="b5.t">Protege del Calor</h3><p class="b-body" data-i18n="b5.b">Escudo térmico natural hasta 230°C. Sin siliconas, sin químicos.</p></div>
+    <div class="b-card"><div class="b-orn">✦</div><h3 class="b-title" data-i18n="b6.t">Fortalece la Fibra</h3><p class="b-body" data-i18n="b6.b">Reduce la rotura, las puntas abiertas y la porosidad del cabello.</p></div>
+  </div>
+</section>
+
+<!-- gold rule transition -->
+<div class="gold-rule in" id="gold-rule" data-bg="dark"></div>
+
+<!-- ────────── SECTION 4 — INGREDIENTS ────────── -->
+<section class="section ingredients" id="ingredients" data-screen-label="04 Ingredients" data-bg="dark">
+  <div class="section-head">
+    <span class="label" data-i18n="ing.label">Los Ingredientes</span>
+    <h2 class="section-h2" data-i18n="ing.h2" style="margin-top:18px">La Naturaleza en su Forma más Pura</h2>
+  </div>
+
+  <div class="ing-block">
+    <div class="ing-img" id="ingredient-1-image">
+      <div class="argan-particles" id="argan-particles" aria-hidden="true"></div>
+    </div>
+    <div class="ing-text">
+      <div class="ing-latin">Argania Spinosa</div>
+      <h3 class="ing-title" data-i18n="ing1.t">Aceite de Argán</h3>
+      <p class="ing-body" data-i18n="ing1.b">Extraído en frío de las cosechas más selectas de Marruecos. Rico en vitamina E, ácidos grasos omega-6 y antioxidantes que nutren el cabello desde la raíz hasta las puntas.</p>
+    </div>
+  </div>
+
+  <div class="ing-block flip">
+    <div class="ing-img" id="ingredient-2-image">
+      <div class="rosemary-particles" id="rosemary-particles" aria-hidden="true"></div>
+    </div>
+    <div class="ing-text" id="ingredient-2-text">
+      <div class="ing-latin">Rosmarinus Officinalis</div>
+      <h3 class="ing-title" data-i18n="ing2.t">Romero Silvestre</h3>
+      <p class="ing-body" data-i18n="ing2.b">Recolectado a mano en las sierras de España. Estimula la microcirculación del cuero cabelludo, reactiva los folículos dormidos y fortalece el cabello desde su estructura interna.</p>
+    </div>
+  </div>
+
+  <div class="ing-block">
+    <div class="ing-img" id="ingredient-3-image"><span class="ing-img-label">Nigella<br>Sativa</span></div>
+    <div class="ing-text" id="ingredient-3-text">
+      <div class="nigella-particles" id="nigella-particles" aria-hidden="true"></div>
+      <div class="ing-latin">Nigella Sativa</div>
+      <h3 class="ing-title" data-i18n="ing3.t">Nigella Sativa</h3>
+      <p class="ing-body" data-i18n="ing3.b">Conocida en la medicina tradicional como la semilla de la bendición. Antiinflamatoria, antifúngica y profundamente regeneradora. Usada durante siglos para restaurar el cabello dañado.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ────────── SECTION 5 — SPLIT ────────── -->
+<section class="split" id="for-all" data-screen-label="05 For All">
+  <div class="split-block women">
+    <div class="split-img" id="para-ella-image"></div>
+    <div class="split-content">
+      <div class="split-label" data-i18n="split.women.l">Para Ella</div>
+      <h2 class="split-h2" data-i18n="split.women.h">Tu cabello,
+restaurado.</h2>
+      <p class="split-body" data-i18n="split.women.b">ZAYT nutre desde la raíz, aporta brillo, reduce la caída y devuelve la vitalidad a cada fibra capilar.</p>
+      <div class="split-cta"><a href="#shop" class="btn btn-outline" data-i18n="cta.shop">Comprar Ahora</a></div>
+    </div>
+  </div>
+  <div class="split-block men">
+    <div class="split-img" id="para-el-image"></div>
+    <div class="split-content">
+      <div class="split-label" data-i18n="split.men.l">Para Él</div>
+      <h2 class="split-h2" data-i18n="split.men.h">Tu cabello,
+recuperado.</h2>
+      <p class="split-body" data-i18n="split.men.b">Formulado también para el hombre moderno. Detiene la caída, fortalece la fibra y da un aspecto más denso y saludable.</p>
+      <div class="split-cta"><a href="#shop" class="btn btn-ghost" data-i18n="cta.shop">Comprar Ahora</a></div>
+    </div>
+  </div>
+</section>
+
+<!-- ────────── SECTION 6 — RITUAL ────────── -->
+<section class="section ritual" id="ritual" data-screen-label="06 Ritual">
+  <div class="section-head">
+    <span class="label" data-i18n="ritual.label">Ritual de Uso</span>
+    <h2 class="section-h2" data-i18n="ritual.h2" style="margin-top:18px">Cómo Usar ZAYT</h2>
+  </div>
+
+  <div class="ritual-mobile">
+    <div class="ritual-step">
+      <div class="ritual-num"><span class="digit" data-target="01">00</span></div>
+      <h3 class="ritual-title" data-i18n="r1.t">Aplica 5-8 Gotas</h3>
+      <p class="ritual-body" data-i18n="r1.b">Vierte directamente sobre el cuero cabelludo seco o húmedo. No es necesario diluir.</p>
+    </div>
+    <div class="ritual-step">
+      <div class="ritual-num"><span class="digit" data-target="02">00</span></div>
+      <h3 class="ritual-title" data-i18n="r2.t">Masajea con Suavidad</h3>
+      <p class="ritual-body" data-i18n="r2.b">Masajea durante 3-5 minutos con movimientos circulares para activar la circulación.</p>
+    </div>
+    <div class="ritual-step">
+      <div class="ritual-num"><span class="digit" data-target="03">00</span></div>
+      <h3 class="ritual-title" data-i18n="r3.t">Deja Actuar</h3>
+      <p class="ritual-body" data-i18n="r3.b">Úsalo como leave-in diario o como mascarilla intensiva aclarándolo tras 30-60 minutos.</p>
+    </div>
+  </div>
+
+  <div class="ritual-desktop in" id="ritual-desktop">
+    <div class="ritual-step">
+      <div class="ritual-num"><span class="digit" data-target="01" data-done="1">01</span></div>
+      <h3 class="ritual-title" data-i18n="r1.t">Aplica 5-8 Gotas</h3>
+      <p class="ritual-body" data-i18n="r1.b">Vierte directamente sobre el cuero cabelludo seco o húmedo. No es necesario diluir.</p>
+    </div>
+    <div class="ritual-step">
+      <div class="ritual-num"><span class="digit" data-target="02" data-done="1">02</span></div>
+      <h3 class="ritual-title" data-i18n="r2.t">Masajea con Suavidad</h3>
+      <p class="ritual-body" data-i18n="r2.b">Masajea durante 3-5 minutos con movimientos circulares para activar la circulación.</p>
+    </div>
+    <div class="ritual-step">
+      <div class="ritual-num"><span class="digit" data-target="03" data-done="1">03</span></div>
+      <h3 class="ritual-title" data-i18n="r3.t">Deja Actuar</h3>
+      <p class="ritual-body" data-i18n="r3.b">Úsalo como leave-in diario o como mascarilla intensiva aclarándolo tras 30-60 minutos.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ────────── SECTION 7 — TESTIMONIALS ────────── -->
+<section class="section testimonials" id="testimonials" data-screen-label="07 Testimonials">
+  <div class="section-head">
+    <span class="label" data-i18n="t.label">Opiniones Reales</span>
+    <h2 class="section-h2" data-i18n="t.h2" style="margin-top:18px">Lo que Dicen Nuestros Clientes</h2>
+  </div>
+
+  <div class="pull">
+    <p class="pull-q" id="pull-q" data-i18n="t.pull" data-full="Después de 3 semanas noté una diferencia real. Mi cabello dejó de caerse y empezó a verse más lleno."><span class="text"></span><span class="caret"></span></p>
+    <div class="pull-attr">— María G., Madrid</div>
+  </div>
+  <hr class="orn-line">
+  <div class="t-grid">
+    <div class="t-card"><div class="t-stars">★ ★ ★ ★ ★</div><p class="t-q" data-i18n="t1.q">Mi cabello ha vuelto a crecer en zonas donde ya había perdido esperanza.</p><div class="t-name">Carlos R.</div><div class="t-loc">Barcelona</div></div>
+    <div class="t-card"><div class="t-stars">★ ★ ★ ★ ★</div><p class="t-q" data-i18n="t2.q">La textura es increíble. No es graso en absoluto y el olor es muy suave y natural.</p><div class="t-name">Laila M.</div><div class="t-loc">Sevilla</div></div>
+    <div class="t-card"><div class="t-stars">★ ★ ★ ★ ★</div><p class="t-q" data-i18n="t3.q">Lo uso cada noche. Mi cuero cabelludo se siente más sano y mi pelo más fuerte que nunca.</p><div class="t-name">Sofia K.</div><div class="t-loc">Valencia</div></div>
+  </div>
+</section>
+
+<!-- ────────── SECTION 8 — SHOP ────────── -->
+<section class="section shop" id="shop" data-screen-label="08 Shop">
+  <span class="shop-orn-top"></span>
+  <div class="shop-zayt-wrap">
+    <h2 class="shop-zayt">ZAYT</h2>
+    <div class="shop-zayt-shine"></div>
+  </div>
+  <div class="shop-elixir shop-rise" data-i18n="shop.elixir">Elixir Botanique</div>
+  <div class="shop-orn shop-rise">✦</div>
+  <div class="shop-desc shop-rise" data-i18n="shop.desc">Argan · Romero · Nigella Sativa · 100ml · Made in Spain</div>
+  <div class="shop-price-row shop-rise">
+    <div class="shop-price">€49.95</div>
+    <div class="shop-pay" data-i18n="shop.pay">o 3 pagos de €16.65 sin intereses</div>
+  </div>
+  <div class="shop-cta shop-rise">
+    <a href="#" class="btn btn-primary" data-i18n="cta.shop">Comprar Ahora</a>
+  </div>
+  <div class="shop-ship shop-rise" data-i18n="shop.ship">Envío gratuito a España · Devolución garantizada 30 días</div>
+  <div class="shop-badges shop-rise"><span data-i18n="shop.b1">Pago Seguro</span>·<span data-i18n="shop.b2">SSL Certificado</span>·<span data-i18n="shop.b3">Datos Protegidos</span></div>
+</section>
+
+<!-- ────────── FOOTER ────────── -->
+<footer class="foot" data-screen-label="09 Footer">
+  <div class="foot-top">
+    <div class="foot-brand">ZAYT</div>
+    <div class="foot-tag" data-i18n="foot.tag">Elixir Botanique</div>
+    <span class="foot-orn"></span>
+  </div>
+  <div class="foot-links">
+    <div class="foot-col">
+      <a class="foot-link" data-i18n="nav.home" href="ZAYT.html">Inicio</a>
+      <a class="foot-link" data-i18n="nav.elixir" href="producto.html">El Elixir</a>
+      <a class="foot-link" data-i18n="nav.ingredients" href="ingredientes.html">Ingredientes</a>
+    </div>
+    <div class="foot-col">
+      <a class="foot-link" data-i18n="nav.articles" href="articulos.html">Artículos</a>
+      <a class="foot-link" data-i18n="nav.about" href="nosotros.html">Nosotros</a>
+      <a class="foot-link" data-i18n="foot.contact" href="#">Contacto</a>
+    </div>
+    <div class="foot-col">
+      <a class="foot-link" data-i18n="foot.privacy" href="#">Política de Privacidad</a>
+      <a class="foot-link" data-i18n="foot.terms" href="#">Términos</a>
+    </div>
+    <div class="foot-col">
+      <a class="foot-link" href="#">Instagram</a>
+      <a class="foot-link" href="#">TikTok</a>
+      <a class="foot-link" href="#">Pinterest</a>
+    </div>
+  </div>
+  <div class="foot-lang">
+    <button class="lang-btn active" data-lang="es">ES</button>
+    <span class="lang-sep">·</span>
+    <button class="lang-btn" data-lang="en">EN</button>
+    <span class="lang-sep">·</span>
+    <button class="lang-btn" data-lang="fr">FR</button>
+  </div>
+  <div class="foot-bottom">
+    <div class="foot-copy" data-i18n="foot.copy">© 2025 ZAYT · Elixir Botanique · Hecho en España · zayt.es</div>
+  </div>
+</footer>
+
+<script>
+/* ──────────── i18n ──────────── */
+const translations = {
+  es:{"brand":"ZAYT","nav.home":"Inicio","nav.elixir":"El Elixir","nav.ingredients":"Ingredientes","nav.articles":"Artículos","nav.about":"Nosotros","nav.shop":"Comprar","hero.eyebrow":"Elixir Botanique","hero.l1":"Oro","hero.l2":"Líquido.","hero.l3":"","hero.sub":"Elixir botánico · Hecho a mano en España.","hero.mw":"","hero.scroll":"Scroll","cta.shop":"Comprar Ahora","cta.discover":"Descubrir →","making.label":"El Proceso","making.h2":"Elaborado con Pureza","making.sub":"Sin químicos. Sin compromiso. Solo naturaleza.","making.video.title":"Animación Botánica","making.video.caption":"[ Video próximamente ]","tag.argan":"Aceite de Argán","tag.rosemary":"Romero Silvestre","tag.nigella":"Nigella Sativa","benefits.label":"Por qué ZAYT","benefits.h2":"Un Elixir para Todo","benefits.sub":"No solo para la caída. Para la salud total del cabello.","b1.t":"Detiene la Caída","b1.b":"Reduce visiblemente la caída desde la primera semana de uso.","b2.t":"Estimula el Crecimiento","b2.b":"Activa los folículos dormidos y acelera el ciclo de regeneración.","b3.t":"Nutre el Cuero Cabelludo","b3.b":"Hidratación profunda sin residuos grasos ni pesadez.","b4.t":"Aporta Brillo Intenso","b4.b":"Cabello sano, luminoso y sedoso al tacto desde la primera aplicación.","b5.t":"Protege del Calor","b5.b":"Escudo térmico natural hasta 230°C. Sin siliconas, sin químicos.","b6.t":"Fortalece la Fibra","b6.b":"Reduce la rotura, las puntas abiertas y la porosidad del cabello.","ing.label":"Los Ingredientes","ing.h2":"La Naturaleza en su Forma más Pura","ing1.t":"Aceite de Argán","ing1.b":"Extraído en frío de las cosechas más selectas de Marruecos. Rico en vitamina E, ácidos grasos omega-6 y antioxidantes que nutren el cabello desde la raíz hasta las puntas.","ing2.t":"Romero Silvestre","ing2.b":"Recolectado a mano en las sierras de España. Estimula la microcirculación del cuero cabelludo, reactiva los folículos dormidos y fortalece el cabello desde su estructura interna.","ing3.t":"Nigella Sativa","ing3.b":"Conocida en la medicina tradicional como la semilla de la bendición. Antiinflamatoria, antifúngica y profundamente regeneradora. Usada durante siglos para restaurar el cabello dañado.","split.women.l":"Para Ella","split.women.h":"Tu cabello,\nrestaurado.","split.women.b":"ZAYT nutre desde la raíz, aporta brillo, reduce la caída y devuelve la vitalidad a cada fibra capilar.","split.men.l":"Para Él","split.men.h":"Tu cabello,\nrecuperado.","split.men.b":"Formulado también para el hombre moderno. Detiene la caída, fortalece la fibra y da un aspecto más denso y saludable.","ritual.label":"Ritual de Uso","ritual.h2":"Cómo Usar ZAYT","r1.t":"Aplica 5-8 Gotas","r1.b":"Vierte directamente sobre el cuero cabelludo seco o húmedo. No es necesario diluir.","r2.t":"Masajea con Suavidad","r2.b":"Masajea durante 3-5 minutos con movimientos circulares para activar la circulación.","r3.t":"Deja Actuar","r3.b":"Úsalo como leave-in diario o como mascarilla intensiva aclarándolo tras 30-60 minutos.","t.label":"Opiniones Reales","t.h2":"Lo que Dicen Nuestros Clientes","t.pull":"Después de 3 semanas noté una diferencia real. Mi cabello dejó de caerse y empezó a verse más lleno.","t1.q":"Mi cabello ha vuelto a crecer en zonas donde ya había perdido esperanza.","t2.q":"La textura es increíble. No es graso en absoluto y el olor es muy suave y natural.","t3.q":"Lo uso cada noche. Mi cuero cabelludo se siente más sano y mi pelo más fuerte que nunca.","shop.elixir":"Elixir Botanique","shop.desc":"Argan · Romero · Nigella Sativa · 100ml · Made in Spain","shop.pay":"o 3 pagos de €16.65 sin intereses","shop.ship":"Envío gratuito a España · Devolución garantizada 30 días","shop.b1":"Pago Seguro","shop.b2":"SSL Certificado","shop.b3":"Datos Protegidos","foot.tag":"Elixir Botanique","foot.contact":"Contacto","foot.privacy":"Política de Privacidad","foot.terms":"Términos","foot.copy":"© 2025 ZAYT · Elixir Botanique · Hecho en España · zayt.es"},
+  en:{"brand":"ZAYT","nav.home":"Home","nav.elixir":"The Elixir","nav.ingredients":"Ingredients","nav.articles":"Journal","nav.about":"About","nav.shop":"Shop","hero.eyebrow":"Elixir Botanique","hero.l1":"Liquid","hero.l2":"Gold.","hero.l3":"","hero.sub":"Botanical elixir · Handcrafted in Spain.","hero.mw":"","hero.scroll":"Scroll","cta.shop":"Shop Now","cta.discover":"Discover →","making.label":"The Process","making.h2":"Crafted in Purity","making.sub":"No chemicals. No compromise. Only nature.","making.video.title":"Botanical Animation","making.video.caption":"[ Video coming soon ]","tag.argan":"Argan Oil","tag.rosemary":"Wild Rosemary","tag.nigella":"Nigella Sativa","benefits.label":"Why ZAYT","benefits.h2":"One Elixir, Everything","benefits.sub":"Not just for hair loss. For total hair health.","b1.t":"Stops Hair Loss","b1.b":"Visibly reduces hair fall from the very first week of use.","b2.t":"Stimulates Growth","b2.b":"Activates dormant follicles and accelerates the regeneration cycle.","b3.t":"Nourishes the Scalp","b3.b":"Deep hydration without greasy residue or heaviness.","b4.t":"Intense Shine","b4.b":"Healthy, luminous, silky hair from the very first application.","b5.t":"Heat Protection","b5.b":"Natural thermal shield up to 230°C. No silicones, no chemicals.","b6.t":"Strengthens the Fiber","b6.b":"Reduces breakage, split ends and the porosity of the hair.","ing.label":"The Ingredients","ing.h2":"Nature in Its Purest Form","ing1.t":"Argan Oil","ing1.b":"Cold-pressed from the most selective harvests in Morocco. Rich in vitamin E, omega-6 fatty acids and antioxidants that nourish hair from root to tip.","ing2.t":"Wild Rosemary","ing2.b":"Hand-harvested in the mountains of Spain. Stimulates scalp microcirculation, reactivates dormant follicles and strengthens hair from within.","ing3.t":"Nigella Sativa","ing3.b":"Known in traditional medicine as the seed of blessing. Anti-inflammatory, antifungal and deeply regenerating. Used for centuries to restore damaged hair.","split.women.l":"For Her","split.women.h":"Your hair,\nrestored.","split.women.b":"ZAYT nourishes from the root, brings shine, reduces hair fall and returns vitality to every capillary fiber.","split.men.l":"For Him","split.men.h":"Your hair,\nrecovered.","split.men.b":"Formulated for the modern man too. Stops hair fall, strengthens the fiber and gives a denser, healthier look.","ritual.label":"The Ritual","ritual.h2":"How to Use ZAYT","r1.t":"Apply 5-8 Drops","r1.b":"Pour directly onto the scalp, dry or damp. No dilution needed.","r2.t":"Massage Gently","r2.b":"Massage for 3-5 minutes with circular motions to activate circulation.","r3.t":"Let It Work","r3.b":"Use as a daily leave-in or as an intensive mask, rinsing after 30-60 minutes.","t.label":"Real Reviews","t.h2":"What Our Customers Say","t.pull":"After 3 weeks I noticed a real difference. My hair stopped falling and started looking fuller.","t1.q":"My hair has grown back in places where I had lost hope.","t2.q":"The texture is incredible. Not greasy at all and the scent is very soft and natural.","t3.q":"I use it every night. My scalp feels healthier and my hair stronger than ever.","shop.elixir":"Elixir Botanique","shop.desc":"Argan · Rosemary · Nigella Sativa · 100ml · Made in Spain","shop.pay":"or 3 payments of €16.65 with no interest","shop.ship":"Free shipping in Spain · 30-day money-back guarantee","shop.b1":"Secure Payment","shop.b2":"SSL Certified","shop.b3":"Data Protected","foot.tag":"Elixir Botanique","foot.contact":"Contact","foot.privacy":"Privacy Policy","foot.terms":"Terms","foot.copy":"© 2025 ZAYT · Elixir Botanique · Made in Spain · zayt.es"},
+  fr:{"brand":"ZAYT","nav.home":"Accueil","nav.elixir":"L'Élixir","nav.ingredients":"Ingrédients","nav.articles":"Journal","nav.about":"À propos","nav.shop":"Acheter","hero.eyebrow":"Elixir Botanique","hero.l1":"Or","hero.l2":"Liquide.","hero.l3":"","hero.sub":"Élixir botanique · Fait à la main en Espagne.","hero.mw":"","hero.scroll":"Défiler","cta.shop":"Acheter","cta.discover":"Découvrir →","making.label":"Le Processus","making.h2":"Élaboré avec Pureté","making.sub":"Sans produits chimiques. Sans compromis. Seulement la nature.","making.video.title":"Animation Botanique","making.video.caption":"[ Vidéo à venir ]","tag.argan":"Huile d'Argan","tag.rosemary":"Romarin Sauvage","tag.nigella":"Nigella Sativa","benefits.label":"Pourquoi ZAYT","benefits.h2":"Un Élixir pour Tout","benefits.sub":"Pas seulement pour la chute. Pour la santé totale du cheveu.","b1.t":"Arrête la Chute","b1.b":"Réduit visiblement la chute dès la première semaine d'utilisation.","b2.t":"Stimule la Croissance","b2.b":"Active les follicules dormants et accélère le cycle de régénération.","b3.t":"Nourrit le Cuir Chevelu","b3.b":"Hydratation profonde sans résidus gras ni lourdeur.","b4.t":"Brillance Intense","b4.b":"Cheveux sains, lumineux et soyeux dès la première application.","b5.t":"Protège de la Chaleur","b5.b":"Bouclier thermique naturel jusqu'à 230°C. Sans silicone, sans produits chimiques.","b6.t":"Renforce la Fibre","b6.b":"Réduit la casse, les pointes fourchues et la porosité du cheveu.","ing.label":"Les Ingrédients","ing.h2":"La Nature dans sa Forme la Plus Pure","ing1.t":"Huile d'Argan","ing1.b":"Pressée à froid à partir des récoltes les plus sélectives du Maroc. Riche en vitamine E, acides gras oméga-6 et antioxydants qui nourrissent les cheveux de la racine aux pointes.","ing2.t":"Romarin Sauvage","ing2.b":"Récolté à la main dans les montagnes d'Espagne. Stimule la microcirculation du cuir chevelu, réactive les follicules dormants et renforce les cheveux de l'intérieur.","ing3.t":"Nigella Sativa","ing3.b":"Connue dans la médecine traditionnelle comme la graine de la bénédiction. Anti-inflammatoire, antifongique et profondément régénérante. Utilisée depuis des siècles pour restaurer les cheveux abîmés.","split.women.l":"Pour Elle","split.women.h":"Vos cheveux,\nrestaurés.","split.women.b":"ZAYT nourrit dès la racine, apporte de la brillance, réduit la chute et redonne vitalité à chaque fibre capillaire.","split.men.l":"Pour Lui","split.men.h":"Vos cheveux,\nretrouvés.","split.men.b":"Formulé aussi pour l'homme moderne. Arrête la chute, renforce la fibre et donne un aspect plus dense et plus sain.","ritual.label":"Le Rituel","ritual.h2":"Comment Utiliser ZAYT","r1.t":"Appliquez 5-8 Gouttes","r1.b":"Versez directement sur le cuir chevelu sec ou humide. Aucune dilution nécessaire.","r2.t":"Massez Doucement","r2.b":"Massez pendant 3-5 minutes avec des mouvements circulaires pour activer la circulation.","r3.t":"Laissez Agir","r3.b":"Utilisez comme leave-in quotidien ou comme masque intensif en rinçant après 30-60 minutes.","t.label":"Vrais Avis","t.h2":"Ce que Disent nos Clients","t.pull":"Après 3 semaines, j'ai remarqué une vraie différence. Mes cheveux ont arrêté de tomber et ont commencé à paraître plus pleins.","t1.q":"Mes cheveux ont repoussé dans des zones où j'avais perdu tout espoir.","t2.q":"La texture est incroyable. Pas grasse du tout et l'odeur est très douce et naturelle.","t3.q":"Je l'utilise chaque nuit. Mon cuir chevelu se sent plus sain et mes cheveux plus forts que jamais.","shop.elixir":"Elixir Botanique","shop.desc":"Argan · Romarin · Nigella Sativa · 100ml · Made in Spain","shop.pay":"ou 3 paiements de €16.65 sans intérêts","shop.ship":"Livraison gratuite en Espagne · Garantie remboursement 30 jours","shop.b1":"Paiement Sécurisé","shop.b2":"SSL Certifié","shop.b3":"Données Protégées","foot.tag":"Elixir Botanique","foot.contact":"Contact","foot.privacy":"Politique de Confidentialité","foot.terms":"Conditions","foot.copy":"© 2025 ZAYT · Elixir Botanique · Fabriqué en Espagne · zayt.es"}
+};
+function detectLang(){
+  try{const s=localStorage.getItem('zayt-lang');if(s&&translations[s])return s;}catch(e){}
+  const n=(navigator.language||'es').toLowerCase();
+  if(n.startsWith('fr'))return'fr';if(n.startsWith('en'))return'en';return 'es';
+}
+function applyLang(lang){
+  if(!translations[lang])lang='es';
+  document.documentElement.lang=lang;
+  const map=translations[lang];
+  document.querySelectorAll('[data-i18n]').forEach(el=>{
+    const k=el.getAttribute('data-i18n');const v=map[k];
+    if(v!=null){
+      if(el.id==='pull-q'){ el.dataset.full=v; renderPullQuote(); }
+      else el.textContent=v;
+    }
+  });
+  document.querySelectorAll('.lang-btn').forEach(b=>b.classList.toggle('active',b.dataset.lang===lang));
+  try{localStorage.setItem('zayt-lang',lang);}catch(e){}
+}
+
+/* ──────────── Drawer + lang switcher ──────────── */
+const drawer=document.getElementById('drawer');
+document.getElementById('hamburger').addEventListener('click',()=>drawer.classList.add('open'));
+document.getElementById('drawer-close').addEventListener('click',()=>drawer.classList.remove('open'));
+drawer.querySelectorAll('.drawer-link').forEach(a=>a.addEventListener('click',()=>drawer.classList.remove('open')));
+document.querySelectorAll('.lang-btn').forEach(b=>b.addEventListener('click',()=>applyLang(b.dataset.lang)));
+
+/* ──────────── Cinematic scroll engine ────────────
+   Drives the bottle, the dark background layer, and the nav theme.
+   We use rAF + scrollY to compute progress through three macro phases:
+   PHASE A: Hero → Making (bottle stays full-bleed, gets slightly smaller)
+   PHASE B: Making → Benefits (bottle shrinks to small center, fades out;
+            dark layer peels back via expanding circle clip-path)
+   PHASE C: Benefits → Ingredients (dark layer closes from edges)
+   Past that, each section's own background is opaque so the layer is hidden.
+*/
+const bottleStage=document.getElementById('bottle-stage');
+const bottle=document.getElementById('bottle');
+const bgDark=document.getElementById('bg-dark');
+const nav=document.getElementById('nav');
+const heroEl=document.getElementById('hero');
+const makingEl=document.getElementById('making');
+const benefitsEl=document.getElementById('benefits');
+const ingredientsEl=document.getElementById('ingredients');
+const splitEl=document.getElementById('for-all');
+
+function clamp(v,a,b){return Math.max(a,Math.min(b,v))}
+function lerp(a,b,t){return a+(b-a)*t}
+function easeInOut(t){return t<.5? 2*t*t : 1-Math.pow(-2*t+2,2)/2}
+
+function computeFrame(){
+  const sy=window.scrollY;
+  const vh=window.innerHeight;
+  const heroBottom=heroEl.offsetTop+heroEl.offsetHeight;
+  const makingTop=makingEl.offsetTop;
+  const makingBottom=makingTop+makingEl.offsetHeight;
+  const benefitsTop=benefitsEl.offsetTop;
+  const benefitsBottom=benefitsTop+benefitsEl.offsetHeight;
+  const ingTop=ingredientsEl.offsetTop;
+
+  /* ---- Bottle behavior ----
+     Hero only: bottle is the hero background, full-bleed.
+     Fades gently in the final 20% of hero scroll.
+     Hidden completely once hero ends — making section has its own solid bg.
+  */
+  let scale=1, ty=0, tx=0, opacity=.9, radius=0;
+
+  if(sy < heroBottom){
+    const t=clamp(sy/heroBottom,0,1);
+    scale=lerp(1,.92,t);
+    // Fade out in last 30% of hero scroll so the seam is invisible
+    opacity = t < 0.7 ? 0.9 : lerp(0.9, 0, (t - 0.7) / 0.3);
+    radius=0;
+  } else {
+    opacity=0;
+  }
+
+  bottle.style.transform=`translate(-50%,-50%) translate(${tx}px,${ty}px) scale(${scale})`;
+  bottle.style.opacity=opacity.toFixed(3);
+  bottle.style.borderRadius=radius+'%';
+  // hide DOM node once past hero — making has solid z:6 background anyway
+  bottleStage.style.display = (sy < heroBottom + 60) ? 'block' : 'none';
+
+  /* ---- Dark background layer — disabled.
+     Every section now has its own solid background.
+     bgDark is permanently hidden. ---- */
+  bgDark.style.maskImage='none';
+  bgDark.style.webkitMaskImage='none';
+  bgDark.style.opacity=0;
+
+  /* ---- Nav theme based on whichever section the nav overlaps ---- */
+  // Determine bg label from section under nav (top 32px)
+  const probe=32;
+  let cur='dark';
+  document.querySelectorAll('[data-bg]').forEach(s=>{
+    const r=s.getBoundingClientRect();
+    if(r.top<=probe && r.bottom>probe) cur=s.getAttribute('data-bg');
+  });
+  // Fallback: explicit class background sections after benefits
+  // (split men side, ritual=cream, testimonials=dark, shop=dark)
+  // If no data-bg matched, infer from section under nav
+  const navY=80;
+  const elAt=document.elementFromPoint(window.innerWidth/2, 8);
+  if(!cur){
+    cur='dark';
+  }
+  // Cleaner: check known sections by Y
+  const ritualEl=document.getElementById('ritual');
+  const testEl=document.getElementById('testimonials');
+  const shopEl=document.getElementById('shop');
+  const sections=[
+    {el:heroEl,bg:'dark'},
+    {el:makingEl,bg:'dark'},
+    {el:benefitsEl,bg:'cream'},
+    {el:ingredientsEl,bg:'dark'},
+    {el:splitEl,bg:'split'},
+    {el:ritualEl,bg:'cream'},
+    {el:testEl,bg:'dark'},
+    {el:shopEl,bg:'dark'},
+  ];
+  for(const s of sections){
+    const r=s.el.getBoundingClientRect();
+    if(r.top<=navY && r.bottom>navY){ cur=s.bg; break; }
+  }
+  // Split section: if left half visible (women=cream) on desktop, treat cream
+  if(cur==='split'){
+    cur = window.innerWidth>=1024 ? 'cream' : 'cream';
+    // simpler: it starts cream then men side; on mobile women is on top
+  }
+  if(cur==='cream'){
+    nav.classList.add('on-cream');nav.classList.remove('on-dark');
+  } else {
+    nav.classList.add('on-dark');nav.classList.remove('on-cream');
+  }
+  nav.classList.toggle('scrolled', sy>80);
+}
+
+let ticking=false;
+function onScroll(){
+  if(!ticking){
+    requestAnimationFrame(()=>{computeFrame();ticking=false});
+    ticking=true;
+  }
+}
+window.addEventListener('scroll', onScroll, {passive:true});
+window.addEventListener('resize', computeFrame);
+
+/* ──────────── Gold rule line draw ──────────── */
+const goldRule=document.getElementById('gold-rule');
+new IntersectionObserver((entries)=>{
+  entries.forEach(e=>{ if(e.isIntersecting){ e.target.classList.add('in'); }});
+},{threshold:.4}).observe(goldRule);
+
+/* ──────────── Split center line draw ──────────── */
+new IntersectionObserver((entries)=>{
+  entries.forEach(e=>{ if(e.isIntersecting){ e.target.classList.add('in'); }});
+},{threshold:.3}).observe(splitEl);
+
+/* ──────────── Ritual horizontal line + step counter ──────────── */
+const ritualDesktop=document.getElementById('ritual-desktop');
+function startCounter(stepEl){
+  const digit=stepEl.querySelector('.digit');
+  if(!digit || digit.dataset.done) return;
+  digit.dataset.done='1';
+  const target=parseInt(digit.getAttribute('data-target'),10);
+  let n=0;
+  const tick=()=>{
+    n+=1;
+    digit.textContent = n.toString().padStart(2,'0');
+    if(n<target) setTimeout(tick, 80);
+  };
+  tick();
+}
+const stepIo=new IntersectionObserver((entries)=>{
+  entries.forEach(e=>{ if(e.isIntersecting){ startCounter(e.target); }});
+},{threshold:.5});
+document.querySelectorAll('.ritual-step').forEach(s=>stepIo.observe(s));
+
+if(ritualDesktop){
+  new IntersectionObserver((entries)=>{
+    entries.forEach(e=>{ if(e.isIntersecting){ e.target.classList.add('in'); }});
+  },{threshold:.3}).observe(ritualDesktop);
+}
+
+/* ──────────── Type-on pull quote ──────────── */
+const pullQ=document.getElementById('pull-q');
+let typingStarted=false;
+function renderPullQuote(){
+  if(!pullQ) return;
+  // store full text
+  if(!pullQ.dataset.full) pullQ.dataset.full=pullQ.textContent.trim();
+  pullQ.innerHTML='<span class="text"></span><span class="caret"></span>';
+  pullQ.classList.remove('typing');
+  typingStarted=false;
+  observeQuote();
+}
+function typeQuote(){
+  if(typingStarted) return;
+  typingStarted=true;
+  const full=pullQ.dataset.full||'';
+  const span=pullQ.querySelector('.text');
+  pullQ.classList.add('typing');
+  let i=0;
+  const tick=()=>{
+    if(i<=full.length){
+      span.textContent=full.slice(0,i);
+      i++;
+      const ch=full[i-1];
+      const delay = ch==='.'||ch===','? 60 : 24;
+      setTimeout(tick, delay);
+    } else {
+      setTimeout(()=>pullQ.classList.remove('typing'), 800);
+    }
+  };
+  tick();
+}
+let quoteIo=null;
+function observeQuote(){
+  if(quoteIo) quoteIo.disconnect();
+  quoteIo=new IntersectionObserver((entries)=>{
+    entries.forEach(e=>{ if(e.isIntersecting){ typeQuote(); quoteIo.disconnect(); }});
+  },{threshold:.6});
+  quoteIo.observe(pullQ);
+}
+
+/* ──────────── Init ──────────── */
+applyLang(detectLang());
+computeFrame();
+
+/* ═══════════════════════════════════════════
+   LUXURY JS LAYER
+   ═══════════════════════════════════════════ */
+
+/* ─── Custom cursor (global fix) ─── */
+(function(){
+  const dot = document.getElementById('cursor-dot');
+  const ring = document.getElementById('cursor-ring');
+  if(!dot || !ring) return;
+  if(window.matchMedia('(hover:none)').matches){
+    dot.remove();
+    ring.remove();
+    return;
+  }
+
+  let mx=-100,my=-100,rx=-100,ry=-100,raf=null,inWindow=false;
+
+  /* show() and hide() always write the opacity — no early-return guard
+     so scroll-dimming can always be reversed by the next mousemove.       */
+  function show(){
+    inWindow=true;
+    dot.style.opacity='1';
+    ring.style.opacity='1';
+  }
+  function hide(){
+    inWindow=false;
+    dot.style.opacity='0';
+    ring.style.opacity='0';
+    ring.classList.remove('hovering','clicking');
+  }
+
+  /* Every mousemove: update position + restore visibility immediately.    */
+  document.addEventListener('mousemove',e=>{
+    mx=e.clientX; my=e.clientY;
+    dot.style.left=mx+'px'; dot.style.top=my+'px';
+    show();
+    if(!raf) raf=requestAnimationFrame(animRing);
+  },{passive:true});
+
+  /* Mouse leaves browser chrome → hide completely.                        */
+  document.addEventListener('mouseleave', hide);
+
+  /* Mouse re-enters → snap ring to cursor before fading in.              */
+  document.addEventListener('mouseenter',e=>{
+    mx=e.clientX; my=e.clientY;
+    rx=mx; ry=my;
+    dot.style.left=mx+'px'; dot.style.top=my+'px';
+    ring.style.left=mx+'px'; ring.style.top=my+'px';
+    show();
+  });
+
+  /* Window loses focus (alt-tab, etc.) → hide.                           */
+  window.addEventListener('blur', hide);
+
+  /* Scrolling without moving the mouse makes the ring look "stuck" on
+     whichever section scrolls under it. Hide ring during scroll;
+     mousemove restores it on the very next move.                          */
+  window.addEventListener('scroll',()=>{
+    dot.style.opacity='0';
+    ring.style.opacity='0';
+  },{passive:true});
+
+  function animRing(){
+    raf=null;
+    rx+=(mx-rx)*.11; ry+=(my-ry)*.11;
+    ring.style.left=Math.round(rx)+'px';
+    ring.style.top=Math.round(ry)+'px';
+    if(Math.abs(mx-rx)>.5||Math.abs(my-ry)>.5) raf=requestAnimationFrame(animRing);
+  }
+
+  document.addEventListener('mousedown',()=>ring.classList.add('clicking'));
+  document.addEventListener('mouseup',()=>ring.classList.remove('clicking'));
+
+  const hoverTargets='a,button,.b-card,.t-card,.ing-img,.btn';
+  document.querySelectorAll(hoverTargets).forEach(el=>{
+    el.addEventListener('mouseenter',()=>{ if(inWindow) ring.classList.add('hovering'); });
+    el.addEventListener('mouseleave',()=>ring.classList.remove('hovering'));
+  });
+})();
+
+/* ─── Section 2 — science cards stagger ─── */
+(function(){
+  const cards = document.querySelectorAll('.sci-card');
+  if(!cards.length) return;
+  const io = new IntersectionObserver(entries=>{
+    entries.forEach(entry=>{
+      if(!entry.isIntersecting) return;
+      const card = entry.target;
+      const idx  = parseInt(card.dataset.sciIdx,10);
+      card.style.transitionDelay = (idx * 0.12) + 's';
+      card.classList.add('sci-visible');
+      io.unobserve(card);
+    });
+  },{threshold:0.2});
+  cards.forEach((c,i)=>{ c.dataset.sciIdx=i; io.observe(c); });
+})();
+
+/* ─── Section 2 — stats count-up ─── */
+(function(){
+  const statsEl = document.getElementById('sci-stats');
+  if(!statsEl) return;
+  let fired = false;
+  function countUp(el){
+    const target = parseInt(el.dataset.target,10);
+    const suffix = el.dataset.suffix||'';
+    if(target===0){ el.textContent='0'+suffix; return; }
+    const dur=2000, start=performance.now();
+    function tick(now){
+      const p=Math.min((now-start)/dur,1);
+      const ease=1-Math.pow(1-p,3);
+      el.textContent=Math.round(ease*target)+suffix;
+      if(p<1) requestAnimationFrame(tick);
+    }
+    requestAnimationFrame(tick);
+  }
+  const io = new IntersectionObserver(entries=>{
+    entries.forEach(entry=>{
+      if(!entry.isIntersecting||fired) return;
+      fired=true;
+      statsEl.querySelectorAll('.sci-stat-number').forEach(countUp);
+      io.unobserve(entry.target);
+    });
+  },{threshold:0.3});
+  io.observe(statsEl);
+})();
+
+/* ─── Split section — scroll reveal + gold divider (CHANGES 3 & 4) ─── */
+(function(){
+  const section = document.getElementById('for-all');
+  const women   = section && section.querySelector('.split-block.women');
+  const men     = section && section.querySelector('.split-block.men');
+  if(!section || !women || !men) return;
+  const io = new IntersectionObserver(entries=>{
+    entries.forEach(entry=>{
+      if(!entry.isIntersecting) return;
+      women.classList.add('split-visible');
+      setTimeout(()=>men.classList.add('split-visible'), 150);
+      section.classList.add('in');
+      io.unobserve(entry.target);
+    });
+  },{threshold:0.2});
+  io.observe(section);
+})();
+
+/* ─── Scroll progress bar ─── */
+(function(){
+  const bar = document.getElementById('scroll-progress');
+  if(!bar) return;
+  function updateBar(){
+    const max = document.documentElement.scrollHeight - window.innerHeight;
+    bar.style.width = (max>0 ? (window.scrollY/max)*100 : 0)+'%';
+  }
+  window.addEventListener('scroll', updateBar, {passive:true});
+  updateBar();
+})();
+
+/* ─── Floating botanical particles in hero ─── */
+(function(){
+  const hero = document.getElementById('hero');
+  if(!hero) return;
+  const wrap = document.createElement('div');
+  wrap.className = 'hero-particles';
+  hero.appendChild(wrap);
+  const count = window.innerWidth < 768 ? 10 : 20;
+  for(let i=0;i<count;i++){
+    const p=document.createElement('div');
+    p.className='particle';
+    const size=Math.random()*3+1;
+    p.style.cssText=`
+      width:${size}px;height:${size}px;
+      left:${Math.random()*100}%;
+      animation-duration:${14+Math.random()*22}s;
+      animation-delay:${-Math.random()*24}s;
+    `;
+    wrap.appendChild(p);
+  }
+})();
+
+/* ─── Section head / label / sub reveal on scroll ─── */
+(function(){
+  const targets=[];
+  document.querySelectorAll('.section-head').forEach(el=>{
+    [el.querySelector('.label'),el.querySelector('.section-h2'),el.querySelector('.section-sub')]
+      .filter(Boolean).forEach((c,i)=>{
+        c.classList.add('s-reveal','s-reveal-delay-'+i);
+        targets.push(c);
+      });
+  });
+  // making-text
+  const mt=document.querySelector('.making-text');
+  if(mt){
+    [mt.querySelector('.label'),mt.querySelector('.section-h2'),mt.querySelector('.section-sub')]
+      .filter(Boolean).forEach((c,i)=>{
+        c.classList.add('s-reveal','s-reveal-delay-'+i);
+        targets.push(c);
+      });
+  }
+  const io=new IntersectionObserver(entries=>{
+    entries.forEach(e=>{if(e.isIntersecting){e.target.classList.add('visible');io.unobserve(e.target);}});
+  },{threshold:0.15});
+  targets.forEach(el=>io.observe(el));
+})();
+
+/* ─── Benefit cards scroll reveal ─── */
+(function(){
+  const cards = document.querySelectorAll('.b-card');
+  if(!cards.length) return;
+  const io = new IntersectionObserver(entries=>{
+    entries.forEach(entry=>{
+      if(!entry.isIntersecting) return;
+      const card = entry.target;
+      const idx  = parseInt(card.dataset.cardIdx, 10);
+      card.style.transitionDelay = (idx * 0.08) + 's';
+      card.classList.add('b-visible');
+      io.unobserve(card);
+    });
+  },{threshold:0.15});
+  cards.forEach((card, i)=>{
+    card.dataset.cardIdx = i;
+    io.observe(card);
+  });
+})();
+
+/* ─── Pull quote decorative lines ─── */
+(function(){
+  const pull=document.querySelector('.pull');
+  if(!pull) return;
+  const io=new IntersectionObserver(entries=>{
+    entries.forEach(e=>{if(e.isIntersecting){e.target.classList.add('lines-in');}});
+  },{threshold:0.5});
+  io.observe(pull);
+})();
+
+/* ─── 3D tilt on ingredient images ─── */
+(function(){
+  if(window.matchMedia('(hover:none)').matches) return;
+  document.querySelectorAll('.ing-img').forEach(el=>{
+    el.addEventListener('mousemove',e=>{
+      const r=el.getBoundingClientRect();
+      const x=(e.clientX-r.left)/r.width-.5;
+      const y=(e.clientY-r.top)/r.height-.5;
+      el.style.transform=`perspective(900px) rotateY(${x*14}deg) rotateX(${-y*14}deg) translateZ(12px)`;
+    });
+    el.addEventListener('mouseleave',()=>{
+      el.style.transform='';
+    });
+  });
+})();
+
+/* ─── Romero Silvestre — needle particles (ingredient-2 right panel) ─── */
+(function(){
+  const container = document.getElementById('rosemary-particles');
+  if(!container) return;
+  for(let i = 0; i < 15; i++){
+    const n = document.createElement('div');
+    n.className = 'rosemary-needle';
+    const x   = 2  + Math.random() * 96;          // 2%–98% of panel width
+    const dur = 8  + Math.random() * 8;            // 8s–16s
+    const del = -(Math.random() * 10);             // 0s to −10s start offset
+    const rot = -30 + Math.random() * 60;          // −30deg to +30deg
+    n.style.cssText =
+      `left:${x.toFixed(1)}%;` +
+      `animation-duration:${dur.toFixed(2)}s;` +
+      `animation-delay:${del.toFixed(2)}s;` +
+      `--rot:${rot.toFixed(1)}deg;`;
+    container.appendChild(n);
+  }
+})();
+
+/* ─── Nigella Sativa — seed particles (ingredient-3 right panel) ─── */
+(function(){
+  const container = document.getElementById('nigella-particles');
+  if(!container) return;
+  for(let i = 0; i < 20; i++){
+    const s = document.createElement('div');
+    s.className = 'nigella-seed';
+    const x   = 2  + Math.random() * 96;
+    const dur = 10 + Math.random() * 10;
+    const del = -(Math.random() * 12);
+    s.style.left              = x   + '%';
+    s.style.animationDuration = dur + 's';
+    s.style.animationDelay    = del + 's';
+    container.appendChild(s);
+  }
+})();
+
+/* ─── Romero Silvestre — text scroll reveal (ingredient-2 left panel) ─── */
+(function(){
+  const panel = document.getElementById('ingredient-2-text');
+  if(!panel) return;
+  const els = [
+    panel.querySelector('.ing-latin'),
+    panel.querySelector('.ing-title'),
+    panel.querySelector('.ing-body'),
+  ].filter(Boolean);
+  els.forEach((el, i) => {
+    el.classList.add('ing2-reveal');
+    el.style.transitionDelay = (i * 0.15) + 's';
+  });
+  const io = new IntersectionObserver(entries => {
+    entries.forEach(e => {
+      if(!e.isIntersecting) return;
+      els.forEach(el => el.classList.add('ing2-visible'));
+      io.disconnect();
+    });
+  }, {threshold: 0.2});
+  io.observe(panel);
+})();
+
+/* ─── Argan seed particles (ingredient-1) ─── */
+(function(){
+  const container = document.getElementById('argan-particles');
+  if(!container) return;
+  const count = 20;
+  for(let i = 0; i < count; i++){
+    const seed = document.createElement('div');
+    seed.className = 'argan-seed';
+    // Size: 4px–12px. Oval: height ~1.6× width for a natural seed shape
+    const w = 4 + Math.random() * 8;
+    const h = w * (1.4 + Math.random() * 0.4);
+    // Random X across full width, with small margin so seeds don't clip edges
+    const x = 3 + Math.random() * 94;
+    // Speed: 6s–14s
+    const dur = 6 + Math.random() * 8;
+    // Delay: 0s–8s (negative = already mid-fall on load)
+    const delay = -(Math.random() * 8);
+    seed.style.cssText =
+      `width:${w.toFixed(1)}px;` +
+      `height:${h.toFixed(1)}px;` +
+      `left:${x.toFixed(1)}%;` +
+      `animation-duration:${dur.toFixed(2)}s;` +
+      `animation-delay:${delay.toFixed(2)}s;`;
+    container.appendChild(seed);
+  }
+})();
+
+/* ─── Magnetic buttons ─── */
+(function(){
+  if(window.matchMedia('(hover:none)').matches) return;
+  document.querySelectorAll('.btn').forEach(btn=>{
+    btn.addEventListener('mousemove',e=>{
+      const r=btn.getBoundingClientRect();
+      const x=((e.clientX-r.left)/r.width)*100;
+      const y=((e.clientY-r.top)/r.height)*100;
+      btn.style.setProperty('--mx',x+'%');
+      btn.style.setProperty('--my',y+'%');
+      const dx=(e.clientX-r.left-r.width/2)*.12;
+      const dy=(e.clientY-r.top-r.height/2)*.12;
+      btn.style.transform=`translate(${dx}px,${dy}px)`;
+    });
+    btn.addEventListener('mouseleave',()=>btn.style.transform='');
+  });
+})();
+</script>
+
+<div id="zayt-tweaks-root"></div>
+<script type="text/babel">
+const TWEAK_DEFAULTS = /*EDITMODE-BEGIN*/{
+  "goldAccent": "#C9A752",
+  "heroOverlay": 0.55,
+  "navScrolledBg": "#080808",
+  "bodyFont": "Jost",
+  "headingFont": "Cormorant Garamond",
+  "cardBorder": "#E8D5A0",
+  "btnRadius": 2
+}/*EDITMODE-END*/;
+
+function ZaytTweaks() {
+  const { values, set } = useTweaks(TWEAK_DEFAULTS);
+
+  React.useEffect(() => {
+    const root = document.documentElement;
+    root.style.setProperty('--gold', values.goldAccent);
+    root.style.setProperty('--gold-light', values.cardBorder);
+    // hero overlay
+    const heroOverlay = document.querySelector('.hero-overlay');
+    if (heroOverlay) {
+      const o = values.heroOverlay;
+      heroOverlay.style.background = `linear-gradient(0deg, rgba(8,8,8,${Math.min(o+0.4,1)}) 0%, rgba(8,8,8,${o}) 45%, rgba(8,8,8,${o}) 100%)`;
+    }
+    const heroTopVig = document.querySelector('.hero-top-vignette');
+    if (heroTopVig) {
+      heroTopVig.style.background = `linear-gradient(180deg, rgba(8,8,8,${values.heroOverlay}) 0%, transparent 100%)`;
+    }
+    // nav scrolled bg
+    const navEl = document.getElementById('nav');
+    if (navEl) {
+      navEl.style.setProperty('--nav-scrolled-bg', values.navScrolledBg);
+    }
+    // body font
+    document.body.style.fontFamily = `'${values.bodyFont}', sans-serif`;
+    // heading font — update CSS var
+    root.style.setProperty('--heading-font', `'${values.headingFont}', serif`);
+    document.querySelectorAll('.section-h2, .hero-h1, .shop-zayt, .split-h2, .ing-title, .b-title, .ritual-num, .pull-q, .t-q, .shop-elixir, .foot-brand, .drawer-brand, .nav-brand').forEach(el => {
+      el.style.fontFamily = `'${values.headingFont}', serif`;
+    });
+    // card border
+    document.querySelectorAll('.b-card').forEach(el => {
+      el.style.borderColor = values.cardBorder;
+    });
+    // button radius
+    document.querySelectorAll('.btn').forEach(el => {
+      el.style.borderRadius = values.btnRadius + 'px';
+    });
+
+    // patch nav scrolled rule via dynamic style
+    let styleTag = document.getElementById('zayt-tweak-style');
+    if (!styleTag) { styleTag = document.createElement('style'); styleTag.id='zayt-tweak-style'; document.head.appendChild(styleTag); }
+    styleTag.textContent = `.nav.on-dark.scrolled { background: ${values.navScrolledBg} !important; }`;
+  }, [values]);
+
+  const fontOptions = ['Cormorant Garamond', 'Jost', 'Raleway', 'Nunito Sans'];
+
+  return (
+    <TweaksPanel>
+      <TweakSection title="Brand Colors">
+        <TweakColor label="Gold Accent" id="goldAccent" value={values.goldAccent} onChange={v => set('goldAccent', v)} />
+        <TweakColor label="Card Border" id="cardBorder" value={values.cardBorder} onChange={v => set('cardBorder', v)} />
+        <TweakColor label="Nav (scrolled)" id="navScrolledBg" value={values.navScrolledBg} onChange={v => set('navScrolledBg', v)} />
+      </TweakSection>
+      <TweakSection title="Hero">
+        <TweakSlider label="Overlay Darkness" id="heroOverlay" value={values.heroOverlay} min={0.1} max={0.9} step={0.05} onChange={v => set('heroOverlay', v)} />
+      </TweakSection>
+      <TweakSection title="Typography">
+        <TweakSelect label="Body Font" id="bodyFont" value={values.bodyFont} options={['Jost','Raleway','Nunito Sans']} onChange={v => set('bodyFont', v)} />
+        <TweakSelect label="Heading Font" id="headingFont" value={values.headingFont} options={['Cormorant Garamond','Jost','Raleway']} onChange={v => set('headingFont', v)} />
+      </TweakSection>
+      <TweakSection title="Components">
+        <TweakSlider label="Button Radius (px)" id="btnRadius" value={values.btnRadius} min={0} max={28} step={1} onChange={v => set('btnRadius', v)} />
+      </TweakSection>
+    </TweaksPanel>
+  );
+}
+
+const zaytTweaksRoot = ReactDOM.createRoot(document.getElementById('zayt-tweaks-root'));
+zaytTweaksRoot.render(<ZaytTweaks />);
+</script>
+
+
+</body></html>

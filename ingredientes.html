@@ -1,0 +1,509 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Ingredientes — ZAYT Botanique</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=Jost:wght@200;300;400;500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --cream:#F7F3ED;--cream-dark:#EDE8DF;--gold:#C9A752;--gold-light:#E8D5A0;
+  --gold-dark:#9C7D2E;--black:#080808;--black-soft:#1A1A1A;
+  --white:#FFFFFF;--text-muted:#555555;--text-cream:rgba(237,232,223,0.85);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth;-webkit-text-size-adjust:100%}
+body{font-family:'Jost',sans-serif;font-weight:300;color:var(--cream);-webkit-font-smoothing:antialiased;overflow-x:hidden;background:var(--black)}
+img,video{max-width:100%;display:block}
+button{font-family:inherit;cursor:pointer;border:none;background:none;color:inherit}
+a{color:inherit;text-decoration:none}
+.btn{display:inline-flex;align-items:center;justify-content:center;font-family:'Jost',sans-serif;font-weight:400;font-size:11px;letter-spacing:4px;text-transform:uppercase;padding:18px 40px;border-radius:2px;border:none;transition:all .35s ease;cursor:pointer;min-height:48px}
+.btn-primary{background:var(--gold);color:var(--black)}
+.btn-primary:hover{background:var(--gold-dark);color:var(--cream)}
+.btn-ghost{background:transparent;border:.5px solid var(--gold);color:var(--gold)}
+.btn-ghost:hover{background:var(--gold);color:var(--black)}
+
+/* Nav */
+.nav{position:fixed;top:0;left:0;right:0;z-index:1000;height:64px;display:flex;align-items:center;justify-content:space-between;padding:0 24px;background:transparent;transition:background .4s ease,border-color .4s ease;border-bottom:.5px solid transparent;color:var(--cream)}
+.nav.scrolled{background:var(--black);border-bottom:.5px solid rgba(201,167,82,0.3);backdrop-filter:blur(8px)}
+.nav.scrolled .nav-brand{color:var(--gold)}
+.nav-brand{font-family:'Cormorant Garamond',serif;font-weight:300;font-size:20px;letter-spacing:8px;color:var(--white);transition:color .4s ease}
+.nav-center{display:none}
+.nav-right{display:flex;align-items:center;gap:16px}
+.lang-switcher{display:none;align-items:center;gap:6px}
+.lang-btn{font-family:'Jost',sans-serif;font-size:9px;font-weight:400;letter-spacing:2px;color:inherit;padding:4px;background:none;border:none;border-bottom:.5px solid transparent;transition:all .3s;cursor:pointer;opacity:.55}
+.lang-btn.active{opacity:1;color:var(--gold);border-bottom:.5px solid var(--gold)}
+.lang-sep{color:var(--gold);opacity:.4;font-size:9px}
+.nav .btn-ghost{display:none}
+.hamburger{width:28px;height:28px;display:flex;flex-direction:column;justify-content:center;gap:5px;background:none;border:none;padding:0;cursor:pointer}
+.hamburger span{display:block;width:22px;height:.5px;background:var(--cream);transition:all .3s}
+@media(min-width:1200px){
+  .nav{height:72px;padding:0 48px}
+  .nav-brand{font-size:26px;letter-spacing:10px}
+  .nav-center{display:flex;gap:36px;align-items:center}
+  .nav-link{font-family:'Jost',sans-serif;font-weight:300;font-size:10px;letter-spacing:3px;text-transform:uppercase;color:rgba(237,232,223,0.9);transition:color .3s;position:relative}
+  .nav-link::after{content:'';position:absolute;bottom:-3px;left:0;right:0;height:.5px;background:var(--gold);transform:scaleX(0);transform-origin:center;transition:transform .35s cubic-bezier(.23,1,.32,1)}
+  .nav-link:hover::after{transform:scaleX(1)}
+  .nav-link:hover{color:var(--gold)}
+  .nav.scrolled .nav-link{color:rgba(237,232,223,0.8)}
+  .lang-switcher{display:flex}
+  .nav .btn-ghost{display:inline-flex;padding:12px 22px;font-size:10px;letter-spacing:3px;width:auto;min-height:0}
+  .hamburger{display:none}
+}
+
+/* Drawer */
+.drawer{position:fixed;inset:0;z-index:2000;background:var(--black);transform:translateX(100%);transition:transform .4s ease;display:flex;flex-direction:column;align-items:center;padding:32px 24px}
+.drawer.open{transform:translateX(0)}
+.drawer-close{position:absolute;top:24px;right:24px;font-family:'Jost',sans-serif;font-weight:300;font-size:24px;color:var(--gold);background:none;border:none;cursor:pointer;line-height:1}
+.drawer-brand{font-family:'Cormorant Garamond',serif;font-weight:300;font-size:32px;letter-spacing:10px;color:var(--gold);margin-top:16px}
+.drawer-orn{width:60px;height:.5px;background:var(--gold);margin:24px 0 40px;opacity:.6}
+.drawer-links{display:flex;flex-direction:column;align-items:center;gap:8px;flex:1;justify-content:center}
+.drawer-link{font-family:'Cormorant Garamond',serif;font-weight:300;font-size:32px;letter-spacing:2px;color:var(--cream);line-height:60px;transition:color .3s}
+.drawer-link:hover{color:var(--gold);letter-spacing:4px}
+.drawer-bottom{display:flex;align-items:center;gap:14px;padding-bottom:24px}
+.drawer-bottom .lang-btn{color:var(--cream)}
+
+.scroll-progress{position:fixed;top:0;left:0;right:0;height:1px;background:var(--gold);transform:scaleX(0);transform-origin:left;z-index:9999}
+.cursor-dot{position:fixed;width:5px;height:5px;background:var(--gold);border-radius:50%;pointer-events:none;z-index:99999;transform:translate(-50%,-50%);opacity:0;left:-100px;top:-100px}
+.cursor-ring{position:fixed;width:38px;height:38px;border:.5px solid rgba(201,167,82,.5);border-radius:50%;pointer-events:none;z-index:99998;transform:translate(-50%,-50%);transition:width .35s cubic-bezier(.23,1,.32,1),height .35s cubic-bezier(.23,1,.32,1),opacity .3s;opacity:0;left:-100px;top:-100px}
+.cursor-ring.hovering{width:60px;height:60px;border-color:rgba(201,167,82,.85)}
+.cursor-ring.clicking{width:24px;height:24px;background:rgba(201,167,82,.15)}
+@media(hover:none){.cursor-dot,.cursor-ring{display:none}}
+
+.s-reveal{opacity:0;transform:translateY(36px);transition:opacity 1s cubic-bezier(.16,1,.3,1),transform 1s cubic-bezier(.16,1,.3,1)}
+.s-reveal.visible{opacity:1;transform:none}
+.s-reveal-delay-1{transition-delay:.15s}.s-reveal-delay-2{transition-delay:.3s}.s-reveal-delay-3{transition-delay:.45s}
+.s-reveal-from-left{opacity:0;transform:translateX(-40px);transition:opacity 1s cubic-bezier(.16,1,.3,1),transform 1s cubic-bezier(.16,1,.3,1)}
+.s-reveal-from-right{opacity:0;transform:translateX(40px);transition:opacity 1s cubic-bezier(.16,1,.3,1),transform 1s cubic-bezier(.16,1,.3,1)}
+.s-reveal-from-left.visible,.s-reveal-from-right.visible{opacity:1;transform:none}
+
+.foot{background:var(--black);border-top:.5px solid rgba(201,167,82,0.3);padding:60px 24px 40px;color:var(--text-cream);position:relative;z-index:3}
+.foot-top{text-align:center}
+.foot-brand{font-family:'Cormorant Garamond',serif;font-weight:300;font-size:28px;color:var(--gold);letter-spacing:10px}
+.foot-tag{font-family:'Cormorant Garamond',serif;font-style:italic;font-size:13px;color:rgba(201,167,82,0.5);margin-top:6px}
+.foot-orn{display:block;width:40px;height:.5px;background:var(--gold);margin:16px auto;opacity:.6}
+.foot-links{display:grid;grid-template-columns:1fr 1fr;gap:8px 24px;margin:48px auto 0;max-width:520px}
+.foot-col{display:flex;flex-direction:column;gap:10px}
+@media(min-width:1024px){.foot-links{display:flex;justify-content:center;gap:48px;max-width:none}.foot-col{align-items:flex-start}}
+.foot-link{font-family:'Jost',sans-serif;font-weight:200;font-size:11px;color:rgba(237,232,223,0.4);letter-spacing:2px;transition:color .3s}
+.foot-link:hover{color:rgba(237,232,223,0.85)}
+.foot-lang{display:flex;justify-content:center;gap:14px;margin-top:48px;align-items:center;color:var(--cream)}
+.foot-bottom{border-top:.5px solid rgba(201,167,82,0.1);margin-top:40px;padding-top:24px;text-align:center}
+.foot-copy{font-family:'Jost',sans-serif;font-weight:200;font-size:10px;color:rgba(237,232,223,0.25);letter-spacing:1px}
+@media(prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+
+/* ─── Page Hero ─── */
+.page-hero{
+  position:relative;min-height:60vh;display:flex;align-items:flex-end;
+  background:var(--black);overflow:hidden;padding:80px 24px 60px;
+}
+.page-hero::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse at 70% 30%,rgba(201,167,82,0.05) 0%,transparent 65%)}
+.page-hero-content{position:relative;z-index:1;max-width:760px}
+.page-hero-eyebrow{font-family:'Jost',sans-serif;font-weight:400;font-size:9px;letter-spacing:6px;text-transform:uppercase;color:var(--gold);opacity:0;animation:fadeIn .5s ease .2s forwards}
+.page-hero-h1{font-family:'Cormorant Garamond',serif;font-weight:300;font-size:clamp(52px,10vw,96px);line-height:.95;letter-spacing:-.5px;color:var(--cream);margin-top:20px;opacity:0;animation:slideUp .9s ease-out .4s forwards}
+.page-hero-h1 em{font-style:italic;color:var(--gold)}
+.page-hero-sub{font-family:'Cormorant Garamond',serif;font-style:italic;font-size:clamp(18px,2.5vw,24px);color:rgba(237,232,223,0.45);margin-top:20px;max-width:560px;line-height:1.5;opacity:0;animation:fadeIn .5s ease .9s forwards}
+@media(min-width:1024px){.page-hero{padding:140px 80px 100px}}
+@keyframes slideUp{from{opacity:0;transform:translateY(40px)}to{opacity:1;transform:translateY(0)}}
+@keyframes fadeIn{to{opacity:1}}
+
+/* ─── Ingredient blocks ─── */
+.ing-block{
+  display:grid;grid-template-columns:1fr;
+  min-height:600px;
+}
+@media(min-width:1024px){.ing-block{grid-template-columns:1fr 1fr;min-height:700px}}
+
+.ing-img-panel{
+  position:relative;min-height:320px;
+  display:flex;align-items:center;justify-content:center;overflow:hidden;
+}
+@media(min-width:1024px){.ing-img-panel{min-height:auto}}
+.ing-img-placeholder{
+  font-family:'Cormorant Garamond',serif;font-style:italic;
+  font-size:20px;color:rgba(201,167,82,0.2);text-align:center;padding:24px;position:relative;z-index:1;
+}
+.ing-img-1{
+  background:
+    linear-gradient(135deg,rgba(0,0,0,0.4) 0%,rgba(0,0,0,0.1) 100%),
+    url('https://tempfile.aiquickdraw.com/workers/nano/image_1777233445798_0k1twc.png');
+  background-size:cover;background-position:center;
+}
+.ing-img-2{
+  background:
+    linear-gradient(135deg,rgba(0,0,0,0.35) 0%,rgba(0,0,0,0.08) 100%),
+    url('https://tempfile.aiquickdraw.com/images/1777234216238-xearoq75h4.png');
+  background-size:cover;background-position:center;
+}
+.ing-img-3{
+  background:
+    linear-gradient(135deg,rgba(0,0,0,0.45) 0%,rgba(0,0,0,0.15) 100%),
+    url('https://tempfile.aiquickdraw.com/workers/nano/image_1777236040419_ms2zpk.png');
+  background-size:cover;background-position:center;
+}
+
+.ing-text-panel{
+  display:flex;flex-direction:column;justify-content:center;padding:64px 32px;
+}
+@media(min-width:1024px){.ing-text-panel{padding:80px 72px}}
+
+/* Dark panels */
+.ing-block.dark .ing-text-panel{background:var(--black);color:var(--cream)}
+.ing-block.dark .ing-label{color:var(--gold)}
+.ing-block.dark .ing-num{color:rgba(201,167,82,0.08)}
+.ing-block.dark .ing-name{color:var(--cream)}
+.ing-block.dark .ing-origin{color:rgba(201,167,82,0.5)}
+.ing-block.dark .ing-divider{background:rgba(201,167,82,0.4)}
+.ing-block.dark .ing-desc{color:rgba(237,232,223,0.55)}
+.ing-block.dark .ing-benefit::before{color:var(--gold)}
+.ing-block.dark .ing-benefit{color:rgba(237,232,223,0.6)}
+.ing-block.dark .ing-science{background:rgba(201,167,82,0.05);border-color:rgba(201,167,82,0.2);color:rgba(237,232,223,0.5)}
+
+/* Cream panels */
+.ing-block.cream .ing-text-panel{background:var(--cream);color:var(--black)}
+.ing-block.cream .ing-label{color:var(--gold-dark)}
+.ing-block.cream .ing-num{color:rgba(156,125,46,0.08)}
+.ing-block.cream .ing-name{color:var(--black)}
+.ing-block.cream .ing-origin{color:rgba(156,125,46,0.6)}
+.ing-block.cream .ing-divider{background:rgba(156,125,46,0.4)}
+.ing-block.cream .ing-desc{color:rgba(8,8,8,0.6)}
+.ing-block.cream .ing-benefit::before{color:var(--gold-dark)}
+.ing-block.cream .ing-benefit{color:rgba(8,8,8,0.6)}
+.ing-block.cream .ing-science{background:rgba(156,125,46,0.06);border-color:rgba(156,125,46,0.2);color:rgba(8,8,8,0.5)}
+
+.ing-label{font-family:'Jost',sans-serif;font-weight:400;font-size:9px;letter-spacing:5px;text-transform:uppercase}
+.ing-num{font-family:'Cormorant Garamond',serif;font-size:80px;line-height:1;position:absolute;right:32px;top:32px;font-weight:300;pointer-events:none}
+@media(min-width:1024px){.ing-num{right:48px;top:48px;font-size:100px}}
+.ing-name{font-family:'Cormorant Garamond',serif;font-weight:300;font-size:clamp(36px,5vw,56px);line-height:1.0;margin-top:12px}
+.ing-name em{font-style:italic}
+.ing-origin{font-family:'Jost',sans-serif;font-size:10px;letter-spacing:4px;text-transform:uppercase;margin-top:8px}
+.ing-divider{width:36px;height:.5px;margin:24px 0;opacity:.5}
+.ing-desc{font-family:'Jost',sans-serif;font-size:13px;line-height:1.85;max-width:480px}
+.ing-benefits{list-style:none;margin-top:24px;display:flex;flex-direction:column;gap:9px}
+.ing-benefit{font-family:'Jost',sans-serif;font-size:12px;letter-spacing:.5px;display:flex;align-items:center;gap:10px}
+.ing-benefit::before{content:'✦';font-size:8px;flex-shrink:0}
+.ing-science{
+  margin-top:28px;padding:16px 20px;
+  border:.5px solid;font-family:'Jost',sans-serif;font-size:11px;letter-spacing:1px;line-height:1.7;
+}
+.ing-text-relative{position:relative}
+
+/* ─── Science section ─── */
+.science-section{
+  background:var(--black-soft);padding:100px 24px;text-align:center;
+  border-top:.5px solid rgba(201,167,82,0.15);
+}
+@media(min-width:1024px){.science-section{padding:140px 80px}}
+.science-inner{max-width:1100px;margin:0 auto}
+.science-label{font-family:'Jost',sans-serif;font-weight:400;font-size:9px;letter-spacing:5px;text-transform:uppercase;color:var(--gold)}
+.science-h2{font-family:'Cormorant Garamond',serif;font-weight:300;font-size:clamp(36px,5vw,64px);line-height:.95;color:var(--cream);margin-top:16px}
+.science-h2 em{font-style:italic;color:var(--gold)}
+.sci-cards{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:64px}
+@media(min-width:1024px){.sci-cards{grid-template-columns:repeat(4,1fr);gap:20px}}
+.sci-card{background:rgba(255,255,255,0.04);border:.5px solid rgba(201,167,82,0.3);padding:28px 22px}
+.sci-card-orn{color:var(--gold);font-size:16px;opacity:.6}
+.sci-card-title{font-family:'Cormorant Garamond',serif;font-weight:300;font-size:18px;color:var(--cream);margin-top:10px;line-height:1.2}
+.sci-stats{display:flex;flex-wrap:wrap;justify-content:center;gap:60px;margin-top:80px}
+.sci-stat-number{font-family:'Cormorant Garamond',serif;font-weight:300;font-size:clamp(48px,8vw,72px);color:var(--gold);line-height:1}
+.sci-stat-label{font-family:'Jost',sans-serif;font-weight:200;font-size:9px;letter-spacing:3px;text-transform:uppercase;color:rgba(237,232,223,0.35);margin-top:6px}
+.sci-quote{
+  max-width:680px;margin:72px auto 0;
+  font-family:'Cormorant Garamond',serif;font-style:italic;font-size:clamp(18px,2.5vw,24px);
+  color:rgba(237,232,223,0.4);line-height:1.6;
+  border-top:.5px solid rgba(201,167,82,0.2);padding-top:40px;
+}
+
+/* ─── CTA ─── */
+.cta-section{background:var(--cream);color:var(--black);padding:100px 24px;text-align:center}
+.cta-h2{font-family:'Cormorant Garamond',serif;font-weight:300;font-size:clamp(36px,5vw,60px);line-height:1.05;color:var(--black)}
+.cta-h2 em{font-style:italic;color:var(--gold-dark)}
+.cta-sub{font-family:'Jost',sans-serif;font-weight:200;font-size:12px;letter-spacing:2px;color:rgba(8,8,8,0.4);margin-top:16px;text-transform:uppercase}
+.cta-btn-row{margin-top:36px;display:flex;gap:16px;justify-content:center;flex-wrap:wrap}
+.btn-outline-dark{background:transparent;border:.5px solid var(--black);color:var(--black)}
+.btn-outline-dark:hover{background:var(--black);color:var(--cream)}
+</style>
+</head>
+<body>
+
+<div class="cursor-dot" id="cursor-dot"></div>
+<div class="cursor-ring" id="cursor-ring"></div>
+<div class="scroll-progress" id="scroll-prog"></div>
+
+<!-- NAV -->
+<nav class="nav" id="nav">
+  <a class="nav-brand" href="ZAYT.html">ZAYT</a>
+  <div class="nav-center">
+    <a class="nav-link" href="ZAYT.html">Inicio</a>
+    <a class="nav-link" href="producto.html">El Elixir</a>
+    <a class="nav-link" href="ingredientes.html">Ingredientes</a>
+    <a class="nav-link" href="articulos.html">Artículos</a>
+    <a class="nav-link" href="nosotros.html">Nosotros</a>
+  </div>
+  <div class="nav-right">
+    <div class="lang-switcher" id="lang-switcher">
+      <button class="lang-btn active" data-lang="es">ES</button>
+      <span class="lang-sep">·</span>
+      <button class="lang-btn" data-lang="en">EN</button>
+      <span class="lang-sep">·</span>
+      <button class="lang-btn" data-lang="fr">FR</button>
+    </div>
+    <a href="producto.html" class="btn btn-ghost">Comprar</a>
+    <button class="hamburger" id="hamburger" aria-label="Menu"><span></span><span></span><span></span></button>
+  </div>
+</nav>
+
+<aside class="drawer" id="drawer">
+  <button class="drawer-close" id="drawer-close">×</button>
+  <div class="drawer-brand">ZAYT</div>
+  <div class="drawer-orn"></div>
+  <div class="drawer-links">
+    <a class="drawer-link" href="ZAYT.html">Inicio</a>
+    <a class="drawer-link" href="producto.html">El Elixir</a>
+    <a class="drawer-link" href="ingredientes.html">Ingredientes</a>
+    <a class="drawer-link" href="articulos.html">Artículos</a>
+    <a class="drawer-link" href="nosotros.html">Nosotros</a>
+  </div>
+  <div class="drawer-bottom">
+    <button class="lang-btn active" data-lang="es">ES</button>
+    <span class="lang-sep">·</span>
+    <button class="lang-btn" data-lang="en">EN</button>
+    <span class="lang-sep">·</span>
+    <button class="lang-btn" data-lang="fr">FR</button>
+  </div>
+</aside>
+
+<!-- HERO -->
+<section class="page-hero">
+  <div class="page-hero-content">
+    <div class="page-hero-eyebrow">ZAYT · Composición Botánica</div>
+    <h1 class="page-hero-h1">Los<br><em>Ingredientes</em></h1>
+    <p class="page-hero-sub">"La naturaleza en su forma más pura. Tres activos. Tres orígenes. Un solo propósito."</p>
+  </div>
+</section>
+
+<!-- INGREDIENT 1: ARGAN -->
+<div class="ing-block dark" id="argan">
+  <div class="ing-img-panel ing-img-1">
+  </div>
+  <div class="ing-text-panel ing-text-relative">
+    <div class="ing-num" aria-hidden="true">01</div>
+    <div class="ing-label s-reveal-from-right">Marruecos · Prensado en Frío</div>
+    <h2 class="ing-name s-reveal-from-right" style="transition-delay:.1s">Aceite de<br><em>Argán</em></h2>
+    <div class="ing-origin s-reveal-from-right" style="transition-delay:.2s">Argania spinosa · Marruecos</div>
+    <div class="ing-divider s-reveal-from-right" style="transition-delay:.25s"></div>
+    <p class="ing-desc s-reveal-from-right" style="transition-delay:.3s">Extraído en frío de las cosechas más selectas del sur de Marruecos. El aceite de argán puro, sin refinar, preserva intactos todos sus activos biológicos.</p>
+    <ul class="ing-benefits s-reveal-from-right" style="transition-delay:.4s">
+      <li class="ing-benefit">Rico en vitamina E y antioxidantes naturales</li>
+      <li class="ing-benefit">Ácidos grasos omega-6 que nutren la fibra capilar</li>
+      <li class="ing-benefit">Protege y repara el cabello dañado por el calor</li>
+      <li class="ing-benefit">Aporta brillo y suavidad sin efecto graso</li>
+    </ul>
+    <div class="ing-science s-reveal-from-right" style="transition-delay:.5s">
+      Estudios demuestran que el aceite de argán reduce la rotura del cabello hasta un 40% con uso regular durante 4 semanas.
+    </div>
+  </div>
+</div>
+
+<!-- INGREDIENT 2: ROSEMARY -->
+<div class="ing-block cream" id="romero">
+  <div class="ing-text-panel ing-text-relative" style="order:2">
+    <div class="ing-num" aria-hidden="true">02</div>
+    <div class="ing-label s-reveal-from-left">España · Recolectado a Mano</div>
+    <h2 class="ing-name s-reveal-from-left" style="transition-delay:.1s">Romero<br><em>Silvestre</em></h2>
+    <div class="ing-origin s-reveal-from-left" style="transition-delay:.2s">Rosmarinus officinalis · Sierra Española</div>
+    <div class="ing-divider s-reveal-from-left" style="transition-delay:.25s"></div>
+    <p class="ing-desc s-reveal-from-left" style="transition-delay:.3s">Recolectado a mano en las sierras de España durante la temporada de máxima floración. El romero silvestre concentra una mayor densidad de activos que el cultivado.</p>
+    <ul class="ing-benefits s-reveal-from-left" style="transition-delay:.4s">
+      <li class="ing-benefit">Estimula la microcirculación del cuero cabelludo</li>
+      <li class="ing-benefit">Reactiva los folículos pilosos dormidos</li>
+      <li class="ing-benefit">Fortalece la raíz y reduce la caída</li>
+      <li class="ing-benefit">Propiedades antiinflamatorias y antioxidantes</li>
+    </ul>
+    <div class="ing-science s-reveal-from-left" style="transition-delay:.5s">
+      Un estudio publicado en SKINmed comparó el romero con minoxidil al 2% en el tratamiento de la alopecia androgenética, con resultados equivalentes a los 6 meses.
+    </div>
+  </div>
+  <div class="ing-img-panel ing-img-2" style="order:1">
+  </div>
+</div>
+<!-- Fix cream order on desktop -->
+<style>@media(min-width:1024px){.ing-block.cream .ing-text-panel{order:1!important}.ing-block.cream .ing-img-panel{order:2!important}}</style>
+
+<!-- INGREDIENT 3: NIGELLA -->
+<div class="ing-block dark" id="nigella">
+  <div class="ing-img-panel ing-img-3">
+  </div>
+  <div class="ing-text-panel ing-text-relative">
+    <div class="ing-num" aria-hidden="true">03</div>
+    <div class="ing-label s-reveal-from-right">Mediterráneo · Tradición Milenaria</div>
+    <h2 class="ing-name s-reveal-from-right" style="transition-delay:.1s">Nigella<br><em>Sativa</em></h2>
+    <div class="ing-origin s-reveal-from-right" style="transition-delay:.2s">Nigella sativa · Mediterráneo Oriental</div>
+    <div class="ing-divider s-reveal-from-right" style="transition-delay:.25s"></div>
+    <p class="ing-desc s-reveal-from-right" style="transition-delay:.3s">Conocida en la medicina tradicional como la semilla de la bendición. Usada durante más de tres milenios en el norte de África y Oriente Medio para el cuidado capilar.</p>
+    <ul class="ing-benefits s-reveal-from-right" style="transition-delay:.4s">
+      <li class="ing-benefit">Potente antiinflamatorio natural (timoquinona)</li>
+      <li class="ing-benefit">Propiedades antifúngicas para el cuero cabelludo</li>
+      <li class="ing-benefit">Regenera el cabello dañado desde la raíz</li>
+      <li class="ing-benefit">Equilibra la producción de sebo</li>
+    </ul>
+    <div class="ing-science s-reveal-from-right" style="transition-delay:.5s">
+      La timoquinona, principal activo de la nigella sativa, ha demostrado en investigaciones inhibir la inflamación del folículo, uno de los principales factores en la alopecia.
+    </div>
+  </div>
+</div>
+
+<!-- SCIENCE -->
+<section class="science-section">
+  <div class="science-inner">
+    <div class="science-label s-reveal">Respaldado por la Ciencia</div>
+    <h2 class="science-h2 s-reveal s-reveal-delay-1">La Naturaleza<br><em>Verificada</em></h2>
+    <div class="sci-cards">
+      <div class="sci-card s-reveal">
+        <div class="sci-card-orn">✦</div>
+        <div class="sci-card-title">100%<br>Botánico</div>
+      </div>
+      <div class="sci-card s-reveal s-reveal-delay-1">
+        <div class="sci-card-orn">✦</div>
+        <div class="sci-card-title">Sin<br>Sulfatos</div>
+      </div>
+      <div class="sci-card s-reveal s-reveal-delay-2">
+        <div class="sci-card-orn">✦</div>
+        <div class="sci-card-title">Sin<br>Parabenos</div>
+      </div>
+      <div class="sci-card s-reveal s-reveal-delay-3">
+        <div class="sci-card-orn">✦</div>
+        <div class="sci-card-title">Vegano &amp;<br>Sin Crueldad</div>
+      </div>
+    </div>
+    <div class="sci-stats">
+      <div class="s-reveal">
+        <div class="sci-stat-number" data-target="97">0</div>
+        <div class="sci-stat-label">% Satisfacción</div>
+      </div>
+      <div class="s-reveal s-reveal-delay-1">
+        <div class="sci-stat-number" data-target="100">0</div>
+        <div class="sci-stat-label">% Botánico</div>
+      </div>
+      <div class="s-reveal s-reveal-delay-2">
+        <div class="sci-stat-number" data-target="0">—</div>
+        <div class="sci-stat-label">Sintéticos</div>
+      </div>
+    </div>
+    <blockquote class="sci-quote s-reveal">
+      "Los aceites botánicos correctamente formulados rivalizan con los tratamientos farmacológicos convencionales, sin sus efectos secundarios."
+    </blockquote>
+  </div>
+</section>
+
+<!-- CTA -->
+<section class="cta-section">
+  <div class="s-reveal">
+    <h2 class="cta-h2">Los tres, en<br>un solo <em>Elixir</em></h2>
+    <p class="cta-sub">Argán · Romero · Nigella Sativa · 100ml · Made in Spain</p>
+    <div class="cta-btn-row">
+      <a href="producto.html" class="btn btn-primary">Comprar Ahora — €49.95</a>
+      <a href="nosotros.html" class="btn btn-outline-dark">Nuestra Historia</a>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer class="foot">
+  <div class="foot-top">
+    <div class="foot-brand">ZAYT</div>
+    <div class="foot-tag">Elixir Botanique</div>
+    <span class="foot-orn"></span>
+  </div>
+  <div class="foot-links">
+    <div class="foot-col">
+      <a class="foot-link" href="ZAYT.html">Inicio</a>
+      <a class="foot-link" href="producto.html">El Elixir</a>
+      <a class="foot-link" href="ingredientes.html">Ingredientes</a>
+    </div>
+    <div class="foot-col">
+      <a class="foot-link" href="articulos.html">Artículos</a>
+      <a class="foot-link" href="nosotros.html">Nosotros</a>
+      <a class="foot-link" href="#">Contacto</a>
+    </div>
+    <div class="foot-col">
+      <a class="foot-link" href="#">Política de Privacidad</a>
+      <a class="foot-link" href="#">Términos</a>
+    </div>
+    <div class="foot-col">
+      <a class="foot-link" href="#">Instagram</a>
+      <a class="foot-link" href="#">TikTok</a>
+      <a class="foot-link" href="#">Pinterest</a>
+    </div>
+  </div>
+  <div class="foot-lang">
+    <button class="lang-btn active" data-lang="es">ES</button>
+    <span class="lang-sep">·</span>
+    <button class="lang-btn" data-lang="en">EN</button>
+    <span class="lang-sep">·</span>
+    <button class="lang-btn" data-lang="fr">FR</button>
+  </div>
+  <div class="foot-bottom">
+    <div class="foot-copy">© 2025 ZAYT · Elixir Botanique · Hecho en España · zayt.es</div>
+  </div>
+</footer>
+
+<script>
+const nav=document.getElementById('nav');
+window.addEventListener('scroll',()=>nav.classList.toggle('scrolled',window.scrollY>40));
+const drawer=document.getElementById('drawer');
+document.getElementById('hamburger').addEventListener('click',()=>drawer.classList.add('open'));
+document.getElementById('drawer-close').addEventListener('click',()=>drawer.classList.remove('open'));
+drawer.querySelectorAll('.drawer-link').forEach(a=>a.addEventListener('click',()=>drawer.classList.remove('open')));
+const prog=document.getElementById('scroll-prog');
+window.addEventListener('scroll',()=>{
+  const p=window.scrollY/(document.documentElement.scrollHeight-window.innerHeight);
+  prog.style.transform=`scaleX(${p})`;
+});
+
+/* Scroll reveal for all reveal types */
+const observer=new IntersectionObserver(entries=>{
+  entries.forEach(e=>{if(e.isIntersecting){e.target.classList.add('visible');observer.unobserve(e.target)}});
+},{threshold:0.1});
+document.querySelectorAll('.s-reveal,.s-reveal-from-left,.s-reveal-from-right').forEach(el=>observer.observe(el));
+
+/* Count-up for stats */
+function countUp(el,target,duration){
+  if(isNaN(target))return;
+  const start=performance.now();
+  function tick(now){
+    const elapsed=now-start;const progress=Math.min(elapsed/duration,1);
+    const ease=1-Math.pow(1-progress,4);
+    el.textContent=Math.round(ease*target)+(target===0?'':target===100?'%':target===97?'%':'');
+    if(progress<1)requestAnimationFrame(tick);
+  }
+  requestAnimationFrame(tick);
+}
+const statsObserver=new IntersectionObserver(entries=>{
+  entries.forEach(e=>{
+    if(e.isIntersecting){
+      const t=parseInt(e.target.dataset.target);
+      if(!isNaN(t))countUp(e.target,t,2000);
+      statsObserver.unobserve(e.target);
+    }
+  });
+},{threshold:0.5});
+document.querySelectorAll('.sci-stat-number[data-target]').forEach(el=>statsObserver.observe(el));
+
+/* Cursor */
+const dot=document.getElementById('cursor-dot');
+const ring=document.getElementById('cursor-ring');
+if(window.matchMedia('(hover:none)').matches){dot.remove();ring.remove();}
+else{
+  let mx=-100,my=-100,rx=-100,ry=-100;
+  document.addEventListener('mousemove',e=>{mx=e.clientX;my=e.clientY;dot.style.left=mx+'px';dot.style.top=my+'px';dot.style.opacity='1';ring.style.opacity='1';});
+  window.addEventListener('scroll',()=>{dot.style.opacity='0';ring.style.opacity='0';});
+  (function loop(){rx+=(mx-rx)*.12;ry+=(my-ry)*.12;ring.style.left=rx+'px';ring.style.top=ry+'px';requestAnimationFrame(loop)})();
+  document.querySelectorAll('a,button').forEach(el=>{el.addEventListener('mouseenter',()=>ring.classList.add('hovering'));el.addEventListener('mouseleave',()=>ring.classList.remove('hovering'));});
+  document.addEventListener('mousedown',()=>ring.classList.add('clicking'));
+  document.addEventListener('mouseup',()=>ring.classList.remove('clicking'));
+}
+</script>
+</body>
+</html>
