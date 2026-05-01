@@ -13,6 +13,14 @@
 <script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
 <script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
 <script type="text/babel" src="tweaks-panel.jsx"></script>
+<!-- TODO: Change Shopify currency to EUR in Settings → Store details -->
+<script type="text/javascript">
+var scriptURL = 'https://sdks.shopifycdn.com/buy-button/latest/buy-button-storefront.min.js';
+var script = document.createElement('script');
+script.async = true;
+script.src = scriptURL;
+document.head.appendChild(script);
+</script>
 <style>
 :root{
   --cream:#F7F3ED;
@@ -1218,7 +1226,7 @@ section{position:relative;z-index:2}
       <span class="lang-sep">·</span>
       <button class="lang-btn" data-lang="fr">FR</button>
     </div>
-    <a href="producto.html" class="btn btn-ghost" data-i18n="nav.shop">Comprar</a>
+    <a href="#" onclick="window.open('https://ssqk06-up.myshopify.com/products/', '_blank'); return false;" class="btn btn-ghost" data-i18n="nav.shop">Comprar</a>
     <button class="hamburger" id="hamburger" aria-label="Menu"><span></span><span></span><span></span></button>
   </div>
 </nav>
@@ -1255,7 +1263,7 @@ section{position:relative;z-index:2}
     </h1>
     <p class="hero-sub" data-i18n="hero.sub">Elixir botánico · Hecho a mano en España.</p>
     <div class="hero-cta">
-      <a href="pedido.html" class="btn btn-primary" data-i18n="cta.shop">Comprar Ahora</a>
+      <a href="#" onclick="window.open('https://ssqk06-up.myshopify.com/products/', '_blank'); return false;" class="btn btn-primary" data-i18n="cta.shop">Comprar Ahora</a>
       <a href="#making" class="hero-cta-link" data-i18n="cta.discover">Descubrir →</a>
     </div>
   </div>
@@ -1398,7 +1406,7 @@ section{position:relative;z-index:2}
       <h2 class="split-h2" data-i18n="split.women.h">Tu cabello,
 restaurado.</h2>
       <p class="split-body" data-i18n="split.women.b">ZAYT nutre desde la raíz, aporta brillo, reduce la caída y devuelve la vitalidad a cada fibra capilar.</p>
-      <div class="split-cta"><a href="pedido.html" class="btn btn-outline" data-i18n="cta.shop">Comprar Ahora</a></div>
+      <div class="split-cta"><a href="#" onclick="window.open('https://ssqk06-up.myshopify.com/products/', '_blank'); return false;" class="btn btn-outline" data-i18n="cta.shop">Comprar Ahora</a></div>
     </div>
   </div>
   <div class="split-block men">
@@ -1408,7 +1416,7 @@ restaurado.</h2>
       <h2 class="split-h2" data-i18n="split.men.h">Tu cabello,
 recuperado.</h2>
       <p class="split-body" data-i18n="split.men.b">Formulado también para el hombre moderno. Detiene la caída, fortalece la fibra y da un aspecto más denso y saludable.</p>
-      <div class="split-cta"><a href="pedido.html" class="btn btn-ghost" data-i18n="cta.shop">Comprar Ahora</a></div>
+      <div class="split-cta"><a href="#" onclick="window.open('https://ssqk06-up.myshopify.com/products/', '_blank'); return false;" class="btn btn-ghost" data-i18n="cta.shop">Comprar Ahora</a></div>
     </div>
   </div>
 </section>
@@ -1491,7 +1499,7 @@ recuperado.</h2>
     <div class="shop-pay" data-i18n="shop.pay">o 3 pagos de €16.65 sin intereses</div>
   </div>
   <div class="shop-cta shop-rise">
-    <a href="pedido.html" class="btn btn-primary" data-i18n="cta.shop">Comprar Ahora</a>
+    <a href="#" onclick="window.open('https://ssqk06-up.myshopify.com/products/', '_blank'); return false;" class="btn btn-primary" data-i18n="cta.shop">Comprar Ahora</a>
   </div>
   <div class="shop-ship shop-rise" data-i18n="shop.ship">Envío gratuito a España · Devolución garantizada 30 días</div>
   <div class="shop-badges shop-rise"><span data-i18n="shop.b1">Pago Seguro</span>·<span data-i18n="shop.b2">SSL Certificado</span>·<span data-i18n="shop.b3">Datos Protegidos</span></div>
@@ -2211,5 +2219,22 @@ const zaytTweaksRoot = ReactDOM.createRoot(document.getElementById('zayt-tweaks-
 zaytTweaksRoot.render(<ZaytTweaks />);
 </script>
 
+<div id="shopify-buy-container" style="display:none"></div>
+<script type="text/javascript">
+function initShopify() {
+  var client = ShopifyBuy.buildClient({
+    domain: 'ssqk06-up.myshopify.com',
+    storefrontAccessToken: '94fa81cffc8a1e9fceacdfa75c9a3fd8',
+  });
+  ShopifyBuy.UI.onReady(client).then(function(ui) {
+    window.shopifyUI = ui;
+    window.shopifyClient = client;
+  });
+}
+var shopifyScript = document.createElement('script');
+shopifyScript.src = 'https://sdks.shopifycdn.com/buy-button/latest/buy-button-storefront.min.js';
+shopifyScript.onload = initShopify;
+document.head.appendChild(shopifyScript);
+</script>
 
 </body></html>
