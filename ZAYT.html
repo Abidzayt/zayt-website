@@ -8,6 +8,10 @@
 <title>ZAYT — Elixir Botanique</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
+<link rel="preconnect" href="https://raw.githubusercontent.com" crossorigin="">
+<link rel="dns-prefetch" href="https://raw.githubusercontent.com">
+<link rel="preload" href="assets/images/split-women.jpg" as="image">
+<link rel="preload" href="assets/images/split-men.jpg" as="image">
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400;1,600&family=Jost:wght@200;300;400;500&family=Raleway:wght@200;300;400&family=Nunito+Sans:wght@200;300;400&display=swap" rel="stylesheet">
 <script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
 <script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
@@ -530,7 +534,7 @@ section{position:relative;z-index:2}
       rgba(247,243,237,0) 30%,
       rgba(247,243,237,0.95) 75%,
       rgba(247,243,237,1) 100%),
-    url('https://raw.githubusercontent.com/Abidzayt/zayt-website/main/assets/images/split-women.png');
+    url('assets/images/split-women.jpg');
   background-size:cover;
   background-position:center top;
 }
@@ -540,7 +544,7 @@ section{position:relative;z-index:2}
       rgba(8,8,8,0) 30%,
       rgba(8,8,8,0.92) 75%,
       rgba(8,8,8,1) 100%),
-    url('https://raw.githubusercontent.com/Abidzayt/zayt-website/main/assets/images/split-men.png');
+    url('assets/images/split-men.jpg');
   background-size:cover;
   background-position:center top;
 }
@@ -732,12 +736,12 @@ section{position:relative;z-index:2}
 @keyframes riseUp{from{opacity:0;transform:translateY(40px)}to{opacity:1;transform:none}}
 
 /* ─────────── FOOTER ─────────── */
-.foot{background:var(--black);border-top:.5px solid rgba(201,167,82,0.3);padding:60px 24px 40px;color:var(--text-cream);position:relative;z-index:3}
+.foot{background:var(--black);border-top:.5px solid rgba(201,167,82,0.3);padding:32px 24px 24px;color:var(--text-cream);position:relative;z-index:3}
 .foot-top{text-align:center}
 .foot-brand{font-family:'Cormorant Garamond',serif;font-weight:300;font-size:28px;color:var(--gold);letter-spacing:10px}
 .foot-tag{font-family:'Cormorant Garamond',serif;font-style:italic;font-size:13px;color:rgba(201,167,82,0.5);margin-top:6px}
 .foot-orn{display:block;width:40px;height:.5px;background:var(--gold);margin:16px auto;opacity:.6}
-.foot-links{display:grid;grid-template-columns:1fr 1fr;gap:8px 24px;margin:48px auto 0;max-width:520px}
+.foot-links{display:grid;grid-template-columns:1fr 1fr;gap:8px 24px;margin:20px auto 0;max-width:520px}
 .foot-col{display:flex;flex-direction:column;gap:10px}
 @media(min-width:1024px){.foot-links{display:flex;justify-content:center;gap:48px;max-width:none}.foot-col{align-items:flex-start}}
 .foot-link{font-family:'Jost',sans-serif;font-weight:200;font-size:11px;color:rgba(237,232,223,0.4);letter-spacing:2px;transition:color .3s ease}
@@ -865,7 +869,7 @@ section{position:relative;z-index:2}
              0 0 40px rgba(201,167,82,.08);
 }
 #ingredient-1-image{
-  background-image:url('https://raw.githubusercontent.com/Abidzayt/zayt-website/main/assets/images/ingredient-argan.png');
+  background-image:url('assets/images/ingredient-argan.jpg');
   background-size:cover;
   background-position:center center;
   background-repeat:no-repeat;
@@ -903,7 +907,7 @@ section{position:relative;z-index:2}
 #ingredient-2-image{
   background:
     linear-gradient(135deg,rgba(0,0,0,0.35) 0%,rgba(0,0,0,0.08) 100%),
-    url('https://raw.githubusercontent.com/Abidzayt/zayt-website/main/assets/images/ingredient-rosemary.png');
+    url('assets/images/ingredient-rosemary.jpg');
   background-size:cover;
   background-position:center;
 }
@@ -954,7 +958,7 @@ section{position:relative;z-index:2}
 #ingredient-3-image{
   background:
     linear-gradient(135deg,rgba(0,0,0,0.45) 0%,rgba(0,0,0,0.15) 100%),
-    url('https://raw.githubusercontent.com/Abidzayt/zayt-website/main/assets/images/ingredient-nigella.png');
+    url('assets/images/ingredient-nigella.jpg');
   background-size:cover;
   background-position:center;
 }
@@ -1204,7 +1208,7 @@ section{position:relative;z-index:2}
 <!-- ── Sticky bottle (always behind text, drives the cinematic feel) ── -->
 <div class="bottle-stage" id="bottle-stage" aria-hidden="true" style="display: block;">
   <div class="bottle" id="bottle" style="transform: translate(-50%, -50%) translate(0px, 0px) scale(1); opacity: 0.9; border-radius: 0%;">
-    <video id="hero-video" autoplay="" muted="" loop="" playsinline="" preload="auto">
+    <video id="hero-video" autoplay="" muted="" loop="" playsinline="" preload="auto" poster="assets/images/product-bottle.jpg" style="background:#080808">
       <source src="https://raw.githubusercontent.com/Abidzayt/zayt-assets/main/8727b944575757b71f793b875290b86f_1_1777291615_9057.mp4" type="video/mp4">
     </video>
   </div>
@@ -1512,9 +1516,8 @@ recuperado.</h2>
   <div class="foot-top">
     <div class="foot-brand">ZAYT</div>
     <div class="foot-tag" data-i18n="foot.tag">Elixir Botanique</div>
-    <span class="foot-orn"></span>
   </div>
-  <div class="foot-links">
+  <div class="foot-links" style="grid-template-columns:1fr 1fr;max-width:480px">
     <div class="foot-col">
       <a class="foot-link" data-i18n="nav.home" href="ZAYT.html">Inicio</a>
       <a class="foot-link" data-i18n="nav.elixir" href="producto.html">El Producto</a>
@@ -1523,26 +1526,10 @@ recuperado.</h2>
     <div class="foot-col">
       <a class="foot-link" data-i18n="nav.articles" href="articulos.html">Artículos</a>
       <a class="foot-link" data-i18n="nav.about" href="nosotros.html">Nosotros</a>
-      <a class="foot-link" data-i18n="foot.contact" href="#">Contacto</a>
-    </div>
-    <div class="foot-col">
-      <a class="foot-link" data-i18n="foot.privacy" href="#">Política de Privacidad</a>
-      <a class="foot-link" data-i18n="foot.terms" href="#">Términos</a>
-    </div>
-    <div class="foot-col">
-      <a class="foot-link" href="#">Instagram</a>
-      <a class="foot-link" href="#">TikTok</a>
-      <a class="foot-link" href="#">Pinterest</a>
+      <a class="foot-link" data-i18n="foot.privacy" href="#">Privacidad</a>
     </div>
   </div>
-  <div class="foot-lang">
-    <button class="lang-btn active" data-lang="es">ES</button>
-    <span class="lang-sep">·</span>
-    <button class="lang-btn" data-lang="en">EN</button>
-    <span class="lang-sep">·</span>
-    <button class="lang-btn" data-lang="fr">FR</button>
-  </div>
-  <div class="foot-bottom">
+  <div class="foot-bottom" style="margin-top:24px">
     <div class="foot-copy" data-i18n="foot.copy">© 2025 ZAYT · Elixir Botanique · Hecho en España · zayt.es</div>
   </div>
 </footer>
